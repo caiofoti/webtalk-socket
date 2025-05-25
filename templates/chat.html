@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}WebTalk - Sala {{ room.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Chat Header -->
+            <div class="card chat-header mb-3">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1 text-white">
+                            <i class="fas fa-comments me-2"></i>{{ room.name }}
+                        </h4>
+                        <small class="text-white-50">
+                            <i class="fas fa-user me-1"></i>Criada por: {{ room.creator }}
+                        </small>
+                    </div>
+                    <div>
+                        <span class="badge bg-light text-dark me-2">
+                            <i class="fas fa-hashtag"></i> {{ room.id }}
+                        </span>
+                        <button id="leaveRoom" class="btn btn-outline-light">
+                            <i class="fas fa-sign-out-alt me-1"></i>Sair
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <!-- Messages Area -->
+                <div class="chat-messages" id="chatMessages">
+                    <div class="text-center text-muted p-4">
+                        <i class="fas fa-comments fa-3x mb-3 opacity-50"></i>
+                        <p>Início da conversa</p>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="chat-input-container">
+                    <div class="input-group">
+                        <input type="text" id="messageInput" class="form-control" placeholder="Digite sua mensagem..." maxlength="500">
+                        <buttonbutton id="sendButton" class="btn btn-primary" type="button" title="Enviar mensagem">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i>Conectado como: <strong id="currentUsername"></strong>
+                        </small>
+                        <small class="text-muted">
+                            <span id="charCount">0</span>/500
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const username = urlParams.get('username') || localStorage.getItem('chatUsername');
+const roomId = '{{ room.id }}';
+let socket;
+
+// Verificar se o usuário tem um nome
+if (!username) {
+    const newUsername = prompt('Digite seu nome para entrar no chat:');
+    if (!newUsername) {
+        window.location.href = '/';
+    } else {
+        localStorage.setItem('chatUsername', newUsername);
+        window.location.search = `username=${encodeURIComponent(newUsername)}`;
+    }
+} else {
+    document.getElementById('currentUsername').textContent = username;
+    initializeChat();
+}
+
+function initializeChat() {
+    socket = io();
+    
+    // Socket events
+    socket.on('connect', function() {
+        console.log('Conectado ao servidor');
+        socket.emit('join', {
+            room_id: roomId,
+            username: username
+        });
+        addSystemMessage(`Você entrou na sala como ${username}`);
+    });
+    
+    socket.on('disconnect', function() {
+        addSystemMessage('Conexão perdida. Tentando reconectar...');
+    });
+    
+    socket.on('user_joined', function(data) {
+        if (data.username !== username) {
+            addSystemMessage(`${data.username} entrou na sala`);
+        }
+    });
+    
+    socket.on('user_left', function(data) {
+        addSystemMessage(`${data.username} saiu da sala`);
+    });
+    
+    socket.on('chat_message', function(data) {
+        addMessage(data);
+    });
+    
+    // UI event listeners
+    document.getElementById('sendButton').addEventListener('click', sendMessage);
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+    
+    document.getElementById('messageInput').addEventListener('input', function() {
+        const charCount = this.value.length;
+        document.getElementById('charCount').textContent = charCount;
+        
+        if (charCount > 450) {
+            document.getElementById('charCount').style.color = '#e74c3c';
+        } else {
+            document.getElementById('charCount').style.color = '#6c757d';
+        }
+    });
+    
+    document.getElementById('leaveRoom').addEventListener('click', function() {
+        if (confirm('Tem certeza que deseja sair da sala?')) {
+            socket.emit('leave', {
+                room_id: roomId,
+                username: username
+            });
+            localStorage.removeItem('chatUsername');
+            window.location.href = '/';
+        }
+    });
+}
+
+function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    
+    if (message && socket) {
+        socket.emit('chat_message', {
+            room_id: roomId,
+            username: username,
+            message: message
+        });
+        input.value = '';
+        document.getElementById('charCount').textContent = '0';
+        document.getElementById('charCount').style.color = '#6c757d';
+    }
+}
+
+function addMessage(data) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    const isOwn = data.username === username;
+    
+    messageDiv.className = `message ${isOwn ? 'message-own' : 'message-other'}`;
+    
+    const messageTime = new Date().toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    messageDiv.innerHTML = `
+        <div class="message-header">
+            ${!isOwn ? `<strong>${data.username}</strong> • ` : ''}${data.timestamp || messageTime}
+        </div>
+        <div class="message-bubble">
+            ${escapeHtml(data.message)}
+        </div>
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function addSystemMessage(text) {
+    const messagesContainer = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    
+    messageDiv.className = 'message message-system';
+    messageDiv.innerHTML = `
+        <div class="message-bubble">
+            <i class="fas fa-info-circle me-1"></i>${escapeHtml(text)}
+        </div>
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Auto-focus on message input
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const input = document.getElementById('messageInput');
+        if (input) input.focus();
+    }, 500);
+});
+</script>
+{% endblock %}

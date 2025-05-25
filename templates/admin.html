@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}WebTalk - Painel Administrativo{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+            <div class="admin-sidebar">
+                <h4 class="text-white mb-4">
+                    <i class="fas fa-cogs me-2"></i>Admin Panel
+                </h4>
+                <ul class="admin-nav">
+                    <li>
+                        <a href="#dashboard" class="admin-nav-link active" data-section="dashboard">
+                            <i class="fas fa-chart-line me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#rooms" class="admin-nav-link" data-section="rooms">
+                            <i class="fas fa-comments me-2"></i>Salas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#settings" class="admin-nav-link" data-section="settings">
+                            <i class="fas fa-cog me-2"></i>Configurações
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="admin-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-chart-line me-2"></i>Dashboard</h2>
+                    <button class="btn btn-outline-primary" onclick="loadStats()">
+                        <i class="fas fa-sync-alt me-1"></i>Atualizar
+                    </button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stat-cards mb-4">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalRooms">-</div>
+                        <div class="stat-label">Total de Salas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="activeRooms">-</div>
+                        <div class="stat-label">Salas Ativas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="onlineUsers">-</div>
+                        <div class="stat-label">Usuários Online</div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>Atividade Recente
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity">
+                            <div class="text-center p-3">
+                                <div class="loading"></div>
+                                <p class="mt-2 mb-0">Carregando atividades...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rooms Section -->
+            <div id="rooms" class="admin-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-comments me-2"></i>Gerenciar Salas</h2>
+                    <button class="btn btn-outline-primary" onclick="loadRooms()">
+                        <i class="fas fa-sync-alt me-1"></i>Atualizar
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="roomsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nome</th>
+                                        <th>Criador</th>
+                                        <th>Criação</th>
+                                        <th>Status</th>
+                                        <th>Usuários</th>
+                                        <th>Mensagens</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="8" class="text-center p-4">
+                                            <div class="loading"></div>
+                                            <p class="mt-2 mb-0">Carregando salas...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="admin-section" style="display: none;">
+                <h2 class="mb-4"><i class="fas fa-cog me-2"></i>Configurações</h2>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Configurações do Servidor</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="settingsForm">
+                                    <div class="mb-3">
+                                        <label for="adminPassword" class="form-label">Senha de Admin</label>
+                                        <input type="password" class="form-control" id="adminPassword" placeholder="Digite a senha atual">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="maxRooms" class="form-label">Máximo de Salas</label>
+                                        <input type="number" class="form-control" id="maxRooms" min="1" value="50">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="roomTimeout" class="form-label">Timeout de Sala (horas)</label>
+                                        <input type="number" class="form-control" id="roomTimeout" min="1" value="24">
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i>Salvar Configurações
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Ações do Sistema</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-warning" onclick="cleanupExpiredRooms()">
+                                        <i class="fas fa-broom me-1"></i>Limpar Salas Expiradas
+                                    </button>
+                                    <button class="btn btn-info" onclick="exportData()">
+                                        <i class="fas fa-download me-1"></i>Exportar Dados
+                                    </button>
+                                    <button class="btn btn-danger" onclick="clearAllData()">
+                                        <i class="fas fa-trash me-1"></i>Limpar Todos os Dados
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Navigation
+    const navLinks = document.querySelectorAll('.admin-nav-link');
+    const sections = document.querySelectorAll('.admin-section');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Update active nav
+            navLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show section
+            const sectionId = this.dataset.section;
+            sections.forEach(section => {
+                section.style.display = section.id === sectionId ? 'block' : 'none';
+            });
+        });
+    });
+    
+    // Initial load
+    loadStats();
+    loadRooms();
+    
+    // Form handler
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSettings();
+    });
+    
+    // Auto refresh every 30 seconds
+    setInterval(() => {
+        loadStats();
+        loadRooms();
+    }, 30000);
+});
+
+function loadStats() {
+    fetch('/api/admin/stats')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('totalRooms').textContent = data.total_rooms || 0;
+            document.getElementById('activeRooms').textContent = data.active_rooms || 0;
+            document.getElementById('onlineUsers').textContent = data.online_users || 0;
+            
+            const activityContainer = document.getElementById('recentActivity');
+            if (data.recent_activity && data.recent_activity.length > 0) {
+                activityContainer.innerHTML = data.recent_activity.map(activity => `
+                    <div class="d-flex align-items-center p-2 border-bottom">
+                        <div class="me-3">
+                            <i class="fas fa-clock text-muted"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted">${activity.time}</small>
+                            <div>${activity.text}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                activityContainer.innerHTML = '<p class="text-muted text-center p-3">Nenhuma atividade recente</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar estatísticas:', error);
+            showAlert('Erro ao carregar estatísticas', 'danger');
+        });
+}
+
+function loadRooms() {
+    fetch('/api/rooms')
+        .then(response => response.json())
+        .then(rooms => {
+            const tbody = document.querySelector('#roomsTable tbody');
+            
+            if (rooms.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center p-4">Nenhuma sala encontrada</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = rooms.map(room => `
+                <tr>
+                    <td><code>${room.id}</code></td>
+                    <td>${room.name}</td>
+                    <td>${room.creator}</td>
+                    <td>${formatDate(room.created_at)}</td>
+                    <td>
+                        <span class="badge ${room.is_active ? 'bg-success' : 'bg-secondary'}">
+                            ${room.is_active ? 'Ativa' : 'Inativa'}
+                        </span>
+                        ${room.has_password ? '<i class="fas fa-lock text-warning ms-1" title="Protegida por senha"></i>' : ''}
+                    </td>
+                    <td>${room.user_count || 0}</td>
+                    <td>${room.message_count || 0}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="viewRoom('${room.id}')" title="Visualizar">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteRoom('${room.id}')" title="Excluir">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        })
+        .catch(error => {
+            console.error('Erro ao carregar salas:', error);
+            showAlert('Erro ao carregar salas', 'danger');
+        });
+}
+
+function viewRoom(roomId) {
+    window.open(`/chat/${roomId}?username=Admin`, '_blank');
+}
+
+function deleteRoom(roomId) {
+    if (!confirm('Tem certeza que deseja excluir esta sala? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+    
+    fetch(`/api/admin/rooms/${roomId}`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showAlert(data.error, 'danger');
+        } else {
+            showAlert('Sala excluída com sucesso!', 'success');
+            loadRooms();
+            loadStats();
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao excluir sala:', error);
+        showAlert('Erro ao excluir sala', 'danger');
+    });
+}
+
+function saveSettings() {
+    const formData = {
+        admin_password: document.getElementById('adminPassword').value,
+        max_rooms: document.getElementById('maxRooms').value,
+        room_timeout: document.getElementById('roomTimeout').value
+    };
+    
+    fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showAlert(data.error, 'danger');
+        } else {
+            showAlert('Configurações salvas com sucesso!', 'success');
+            document.getElementById('adminPassword').value = '';
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao salvar configurações:', error);
+        showAlert('Erro ao salvar configurações', 'danger');
+    });
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    try {
+        return new Date(dateString).toLocaleString('pt-BR');
+    } catch {
+        return dateString;
+    }
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function cleanupExpiredRooms() {
+    if (confirm('Limpar todas as salas expiradas?')) {
+        showAlert('Funcionalidade em desenvolvimento', 'info');
+    }
+}
+
+function exportData() {
+    showAlert('Funcionalidade em desenvolvimento', 'info');
+}
+
+function clearAllData() {
+    if (confirm('ATENÇÃO: Isso irá excluir TODOS os dados! Tem certeza?')) {
+        showAlert('Funcionalidade em desenvolvimento', 'info');
+    }
+}
+</script>
+{% endblock %}
