@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session
-from models.room import room_manager
+from models.room import gerenciador_salas
 from config import Config
 
 admin_bp = Blueprint('admin', __name__)
@@ -10,96 +10,96 @@ def admin():
     return render_template('admin.html')
 
 
-@admin_bp.route('/api/admin/stats')
-def admin_stats():
+@admin_bp.route('/api/admin/estatisticas')
+def estatisticas_admin():
     try:
-        # Executar limpeza de salas expiradas a cada vez que as estatísticas são solicitadas
-        expired_count = room_manager.cleanup_expired_rooms()
-        if expired_count > 0:
-            print(f"Cleaned up {expired_count} expired rooms")
-
-        stats = room_manager.get_stats()
-        return jsonify(stats)
+        estatisticas = gerenciador_salas.obter_estatisticas()
+        return jsonify(estatisticas)
 
     except Exception as e:
         print(f"Erro ao obter estatísticas do admin: {e}")
         return jsonify({
-            'total_rooms': 0,
-            'active_rooms': 0,
-            'online_users': 0,
-            'recent_activity': []
+            'total_salas': 0,
+            'salas_ativas': 0,
+            'usuarios_online': 0,
+            'atividade_recente': []
         })
 
 
-@admin_bp.route('/api/admin/rooms/<room_id>', methods=['DELETE'])
-def delete_room(room_id):
+@admin_bp.route('/api/admin/salas/<id_sala>', methods=['DELETE'])
+def excluir_sala(id_sala):
     try:
-        room = room_manager.get_room(room_id)
-        if not room:
-            return jsonify({'error': 'Sala não encontrada'}), 404
+        sala = gerenciador_salas.obter_sala(id_sala)
+        if not sala:
+            return jsonify({'erro': 'Sala não encontrada'}), 404
 
-        success = room_manager.delete_room(room_id)
+        sucesso = gerenciador_salas.excluir_sala(id_sala)
 
-        if success:
-            return jsonify({'message': 'Sala excluída com sucesso'})
-        return jsonify({'error': 'Erro ao excluir sala'}), 500
+        if sucesso:
+            return jsonify({'mensagem': 'Sala excluída com sucesso'})
+        return jsonify({'erro': 'Erro ao excluir sala'}), 500
 
     except Exception as e:
         print(f"Erro ao excluir sala: {e}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+        return jsonify({'erro': 'Erro interno do servidor'}), 500
 
 
-@admin_bp.route('/api/admin/settings', methods=['POST'])
-def update_settings():
+@admin_bp.route('/api/admin/configuracoes', methods=['POST'])
+def atualizar_configuracoes():
     try:
-        data = request.json
-        if not data:
-            return jsonify({'error': 'Dados não fornecidos'}), 400
+        dados = request.json
+        if not dados:
+            return jsonify({'erro': 'Dados não fornecidos'}), 400
 
-        # Validar senha de admin
-        admin_password = data.get('admin_password', '')
-        if not admin_password:
-            return jsonify({'error': 'Senha de administrador é obrigatória'}), 400
+        senha_admin = dados.get('senha_admin', '')
+        if not senha_admin:
+            return jsonify({'erro': 'Senha de administrador é obrigatória'}), 400
 
-        if admin_password != Config.ADMIN_PASSWORD:
-            return jsonify({'error': 'Senha de administrador incorreta'}), 401
+        if senha_admin != Config.ADMIN_PASSWORD:
+            return jsonify({'erro': 'Senha de administrador incorreta'}), 401
 
-        # Atualizar configurações
-        # Em um sistema real, você atualizaria as configurações no banco de dados ou arquivo de configuração
-        max_rooms = data.get('max_rooms', 50)
-        room_timeout = data.get('room_timeout', 24)
+        maximo_salas = dados.get('maximo_salas', 50)
+        timeout_sala = dados.get('timeout_sala', 24)
 
-        # Validações
         try:
-            max_rooms = int(max_rooms)
-            room_timeout = int(room_timeout)
+            maximo_salas = int(maximo_salas)
+            timeout_sala = int(timeout_sala)
 
-            if max_rooms < 1 or max_rooms > 1000:
-                return jsonify({'error': 'Máximo de salas deve estar entre 1 e 1000'}), 400
+            if maximo_salas < 1 or maximo_salas > 1000:
+                return jsonify({'erro': 'Máximo de salas deve estar entre 1 e 1000'}), 400
 
-            if room_timeout < 1 or room_timeout > 168:  # Máximo 1 semana
-                return jsonify({'error': 'Timeout deve estar entre 1 e 168 horas'}), 400
+            if timeout_sala < 1 or timeout_sala > 168:
+                return jsonify({'erro': 'Timeout deve estar entre 1 e 168 horas'}), 400
 
         except ValueError:
-            return jsonify({'error': 'Valores numéricos inválidos'}), 400
+            return jsonify({'erro': 'Valores numéricos inválidos'}), 400
 
-        # Por ora, apenas simulamos sucesso
-        return jsonify({'message': 'Configurações atualizadas com sucesso'})
+        return jsonify({'mensagem': 'Configurações atualizadas com sucesso'})
 
     except Exception as e:
         print(f"Erro ao atualizar configurações: {e}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+        return jsonify({'erro': 'Erro interno do servidor'}), 500
 
 
-@admin_bp.route('/api/admin/cleanup', methods=['POST'])
-def cleanup_rooms():
+@admin_bp.route('/api/admin/limpeza', methods=['POST'])
+def limpar_salas():
     try:
-        expired_count = room_manager.cleanup_expired_rooms()
+        contador_expiradas = gerenciador_salas.limpar_salas_expiradas()
         return jsonify({
-            'message': f'{expired_count} salas expiradas foram limpas',
-            'cleaned_count': expired_count
+            'mensagem': f'{contador_expiradas} salas expiradas foram limpas',
+            'contador_limpas': contador_expiradas
         })
 
     except Exception as e:
         print(f"Erro ao limpar salas: {e}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+        return jsonify({'erro': 'Erro interno do servidor'}), 500
+    try:
+        contador_expiradas = gerenciador_salas.limpar_salas_expiradas()
+        return jsonify({
+            'mensagem': f'{contador_expiradas} salas expiradas foram limpas',
+            'contador_limpas': contador_expiradas
+        })
+
+    except Exception as e:
+        print(f"Erro ao limpar salas: {e}")
+        return jsonify({'erro': 'Erro interno do servidor'}), 500

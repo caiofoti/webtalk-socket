@@ -27,20 +27,20 @@
                     <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Criar Nova Sala</h5>
                 </div>
                 <div class="card-body">
-                    <form id="createRoomForm">
+                    <form id="formularioCriarSala">
                         <div class="mb-3">
-                            <label for="roomName" class="form-label">Nome da Sala</label>
-                            <input type="text" class="form-control" id="roomName" placeholder="Digite o nome da sala" required>
+                            <label for="nomeSala" class="form-label">Nome da Sala</label>
+                            <input type="text" class="form-control" id="nomeSala" placeholder="Digite o nome da sala" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="creatorName" class="form-label">Seu Nome</label>
-                            <input type="text" class="form-control" id="creatorName" placeholder="Digite seu nome" required>
+                            <label for="nomeCriador" class="form-label">Seu Nome</label>
+                            <input type="text" class="form-control" id="nomeCriador" placeholder="Digite seu nome" required autocomplete="username">
                         </div>
                         
                         <div class="mb-3">
-                            <label for="roomPassword" class="form-label">Senha (Opcional)</label>
-                            <input type="password" class="form-control" id="roomPassword" placeholder="Senha para sala privada">
+                            <label for="senhaSala" class="form-label">Senha (Opcional)</label>
+                            <input type="password" class="form-control" id="senhaSala" placeholder="Senha para sala privada" autocomplete="new-password">
                             <div class="form-text">Deixe em branco para sala pública</div>
                         </div>
                         
@@ -59,20 +59,20 @@
                     <h5 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Entrar por Código</h5>
                 </div>
                 <div class="card-body">
-                    <form id="joinRoomForm">
+                    <form id="formularioEntrarSala">
                         <div class="mb-3">
-                            <label for="joinRoomId" class="form-label">Código da Sala</label>
-                            <input type="text" class="form-control" id="joinRoomId" placeholder="Digite o código da sala" required>
+                            <label for="idSalaEntrar" class="form-label">Código da Sala</label>
+                            <input type="text" class="form-control" id="idSalaEntrar" placeholder="Digite o código da sala" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="joinUsername" class="form-label">Seu Nome</label>
-                            <input type="text" class="form-control" id="joinUsername" placeholder="Digite seu nome" required>
+                            <label for="nomeUsuarioEntrar" class="form-label">Seu Nome</label>
+                            <input type="text" class="form-control" id="nomeUsuarioEntrar" placeholder="Digite seu nome" required autocomplete="username">
                         </div>
                         
                         <div class="mb-3">
-                            <label for="joinPassword" class="form-label">Senha (se necessário)</label>
-                            <input type="password" class="form-control" id="joinPassword" placeholder="Senha da sala">
+                            <label for="senhaEntrar" class="form-label">Senha (se necessário)</label>
+                            <input type="password" class="form-control" id="senhaEntrar" placeholder="Senha da sala" autocomplete="current-password">
                         </div>
                         
                         <button type="submit" class="btn btn-success w-100">
@@ -88,12 +88,12 @@
             <div class="card h-100">
                 <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-list me-2"></i>Salas Disponíveis</h5>
-                    <button type="button" class="btn btn-sm btn-outline-light" onclick="loadRooms()" title="Atualizar lista de salas">
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="carregarSalas()" title="Atualizar lista de salas">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
                 <div class="card-body p-0">
-                    <div id="roomsList" class="rooms-list-container">
+                    <div id="listaSalas" class="rooms-list-container">
                         <div class="text-center p-3">
                             <div class="loading"></div>
                             <p class="mt-2 mb-0">Carregando salas...</p>
@@ -106,7 +106,7 @@
 </div>
 
 <!-- Password Modal -->
-<div class="modal fade" id="passwordModal" tabindex="-1">
+<div class="modal fade" id="modalSenha" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -114,17 +114,21 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" title="Fechar"></button>
             </div>
             <div class="modal-body">
-                <p>Esta sala requer uma senha para acesso.</p>
-                <div class="mb-3">
-                    <label for="modalPassword" class="form-label">Senha</label>
-                    <input type="password" class="form-control" id="modalPassword" placeholder="Digite a senha">
-                </div>
-                <input type="hidden" id="modalRoomId">
-                <input type="hidden" id="modalUsername">
+                <form>
+                    <p>Esta sala requer uma senha para acesso.</p>
+                    <div class="mb-3">
+                        <label for="nomeUsuarioModalHidden" class="form-label visually-hidden">Nome de usuário</label>
+                        <input type="text" class="form-control visually-hidden" id="nomeUsuarioModalHidden" autocomplete="username">
+                        <label for="senhaModal" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="senhaModal" placeholder="Digite a senha" autocomplete="current-password">
+                    </div>
+                    <input type="hidden" id="idSalaModal">
+                    <input type="hidden" id="nomeUsuarioModal">
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="submitPassword()">Entrar</button>
+                <button type="button" class="btn btn-primary" onclick="enviarSenha()">Entrar</button>
             </div>
         </div>
     </div>
@@ -135,11 +139,4 @@
 {% block script %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-<script>
-// Form submission handlers
-document.getElementById('joinRoomForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    joinRoom();
-});
-</script>
 {% endblock %}

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify
-from models.room import room_manager
+from models.room import gerenciador_salas
 
 main_bp = Blueprint('main', __name__)
 
@@ -9,75 +9,75 @@ def index():
     return render_template('index.html')
 
 
-@main_bp.route('/chat/<room_id>')
-def chat(room_id):
-    room = room_manager.get_room(room_id)
-    if not room:
-        return render_template('index.html', error='Sala não encontrada!')
-    return render_template('chat.html', room=room)
+@main_bp.route('/chat/<id_sala>')
+def chat(id_sala):
+    sala = gerenciador_salas.obter_sala(id_sala)
+    if not sala:
+        return render_template('index.html', erro='Sala não encontrada!')
+    return render_template('chat.html', room=sala)
 
 
-@main_bp.route('/api/rooms', methods=['GET'])
-def get_rooms():
+@main_bp.route('/api/salas', methods=['GET'])
+def obter_salas():
     try:
-        rooms = [room.to_dict()
-                 for room in room_manager.get_all_rooms() if room.is_active]
-        return jsonify(rooms)
+        salas = [sala.para_dicionario()
+                 for sala in gerenciador_salas.obter_todas_salas() if sala.esta_ativa]
+        return jsonify(salas)
     except Exception as e:
         print(f"Erro ao buscar salas: {e}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+        return jsonify({'erro': 'Erro interno do servidor'}), 500
 
 
-@main_bp.route('/api/rooms', methods=['POST'])
-def create_room():
+@main_bp.route('/api/salas', methods=['POST'])
+def criar_sala():
     try:
-        data = request.json
-        if not data:
-            return jsonify({'error': 'Dados não fornecidos'}), 400
+        dados = request.json
+        if not dados:
+            return jsonify({'erro': 'Dados não fornecidos'}), 400
 
-        name = data.get('name', '').strip() if data.get('name') else ''
-        creator = data.get('creator', '').strip(
-        ) if data.get('creator') else ''
-        password = data.get('password', '').strip(
-        ) if data.get('password') else None
+        nome = dados.get('nome', '').strip() if dados.get('nome') else ''
+        criador = dados.get('criador', '').strip(
+        ) if dados.get('criador') else ''
+        senha = dados.get('senha', '').strip(
+        ) if dados.get('senha') else None
 
-        if not name or not creator:
-            return jsonify({'error': 'Nome da sala e criador são obrigatórios'}), 400
+        if not nome or not criador:
+            return jsonify({'erro': 'Nome da sala e criador são obrigatórios'}), 400
 
         # Verificar se o nome da sala não é muito longo
-        if len(name) > 50:
-            return jsonify({'error': 'Nome da sala muito longo (máximo 50 caracteres)'}), 400
+        if len(nome) > 50:
+            return jsonify({'erro': 'Nome da sala muito longo (máximo 50 caracteres)'}), 400
 
-        if len(creator) > 30:
-            return jsonify({'error': 'Nome do criador muito longo (máximo 30 caracteres)'}), 400
+        if len(criador) > 30:
+            return jsonify({'erro': 'Nome do criador muito longo (máximo 30 caracteres)'}), 400
 
-        room = room_manager.create_room(name, creator, password)
-        return jsonify({'room_id': room.id, 'message': 'Sala criada com sucesso!'})
+        sala = gerenciador_salas.criar_sala(nome, criador, senha)
+        return jsonify({'id_sala': sala.id, 'mensagem': 'Sala criada com sucesso!'})
 
     except Exception as e:
         print(f"Erro ao criar sala: {e}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+        return jsonify({'erro': 'Erro interno do servidor'}), 500
 
 
-@main_bp.route('/api/rooms/<room_id>/join', methods=['POST'])
-def join_room(room_id):
+@main_bp.route('/api/salas/<id_sala>/entrar', methods=['POST'])
+def entrar_sala(id_sala):
     try:
-        data = request.json or {}
-        password = data.get('password', '').strip(
-        ) if data.get('password') else ''
+        dados = request.json or {}
+        senha = dados.get('senha', '').strip(
+        ) if dados.get('senha') else ''
 
-        room = room_manager.get_room(room_id)
-        if not room:
-            return jsonify({'error': 'Sala não encontrada'}), 404
+        sala = gerenciador_salas.obter_sala(id_sala)
+        if not sala:
+            return jsonify({'erro': 'Sala não encontrada'}), 404
 
-        if not room.is_active:
-            return jsonify({'error': 'Sala não está mais ativa'}), 403
+        if not sala.esta_ativa:
+            return jsonify({'erro': 'Sala não está mais ativa'}), 403
 
-        if not room_manager.verify_room_password(room_id, password):
-            return jsonify({'error': 'Senha incorreta!'}), 401
+        if not gerenciador_salas.verificar_senha_sala(id_sala, senha):
+            return jsonify({'erro': 'Senha incorreta!'}), 401
 
-        return jsonify({'message': 'Acesso autorizado!'})
+        return jsonify({'mensagem': 'Acesso autorizado!'})
 
     except Exception as e:
         print(f"Erro ao entrar na sala: {e}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+        return jsonify({'erro': 'Erro interno do servidor'}), 500

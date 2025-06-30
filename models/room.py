@@ -7,319 +7,319 @@ import json
 import threading
 
 
-class Room:
-    def __init__(self, id, name, creator, created_at=None, password=None, is_active=True):
+class Sala:
+    def __init__(self, id, nome, criador, criado_em=None, senha=None, esta_ativa=True):
         self.id = id
-        self.name = name
-        self.creator = creator
-        self.password = password
-        self.is_active = is_active
-        self.created_at = created_at or datetime.now().isoformat()
-        self.messages = []
-        self.users = set()
-        self.last_activity = time.time()
+        self.nome = nome
+        self.criador = criador
+        self.senha = senha
+        self.esta_ativa = esta_ativa
+        self.criado_em = criado_em or datetime.now().isoformat()
+        self.mensagens = []
+        self.usuarios = set()
+        self.ultima_atividade = time.time()
 
-    def to_dict(self):
+    def para_dicionario(self):
         return {
             'id': self.id,
-            'name': self.name,
-            'creator': self.creator,
-            'created_at': self.created_at,
-            'has_password': bool(self.password),
-            'is_active': self.is_active,
-            'user_count': len(self.users),
-            'message_count': len(self.messages)
+            'nome': self.nome,
+            'criador': self.criador,
+            'criado_em': self.criado_em,
+            'tem_senha': bool(self.senha),
+            'esta_ativa': self.esta_ativa,
+            'contador_usuarios': len(self.usuarios),
+            'contador_mensagens': len(self.mensagens)
         }
 
-    def add_user(self, username):
-        self.users.add(username)
-        self.update_activity()
+    def adicionar_usuario(self, nome_usuario):
+        self.usuarios.add(nome_usuario)
+        self.atualizar_atividade()
 
-    def remove_user(self, username):
-        if username in self.users:
-            self.users.remove(username)
-        self.update_activity()
+    def remover_usuario(self, nome_usuario):
+        if nome_usuario in self.usuarios:
+            self.usuarios.remove(nome_usuario)
+        self.atualizar_atividade()
 
-    def add_message(self, message):
-        self.messages.append(message)
-        self.update_activity()
-        if len(self.messages) > 100:  # Limitar a 100 mensagens mais recentes
-            self.messages = self.messages[-100:]
+    def adicionar_mensagem(self, mensagem):
+        self.mensagens.append(mensagem)
+        self.atualizar_atividade()
+        if len(self.mensagens) > 100:  # Limitar a 100 mensagens mais recentes
+            self.mensagens = self.mensagens[-100:]
 
-    def update_activity(self):
-        self.last_activity = time.time()
+    def atualizar_atividade(self):
+        self.ultima_atividade = time.time()
 
-    def is_expired(self, timeout_hours=24):
+    def esta_expirada(self, timeout_horas=24):
         # Verifica se a sala está inativa por mais do tempo definido
-        elapsed = time.time() - self.last_activity
-        return elapsed > (timeout_hours * 60 * 60) and not self.users
+        tempo_decorrido = time.time() - self.ultima_atividade
+        return tempo_decorrido > (timeout_horas * 60 * 60) and not self.usuarios
 
 
-class RoomManager:
-    def __init__(self, db_path='db.sqlite3'):
-        self.db_path = db_path
-        self.rooms = {}
-        self._lock = threading.Lock()
-        self.init_db()
-        self.load_rooms()
+class GerenciadorSalas:
+    def __init__(self, caminho_bd='db.sqlite3'):
+        self.caminho_bd = caminho_bd
+        self.salas = {}
+        self._trava = threading.Lock()
+        self.inicializar_bd()
+        self.carregar_salas()
 
-    def init_db(self):
+    def inicializar_bd(self):
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
+            conexao = sqlite3.connect(self.caminho_bd)
+            cursor = conexao.cursor()
 
-            # Criar tabela de salas se não existir
+            # Criar tabela de salas se não existir (versão nova com nomes em português)
             cursor.execute('''
-            CREATE TABLE IF NOT EXISTS rooms (
+            CREATE TABLE IF NOT EXISTS salas (
                 id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                creator TEXT NOT NULL,
-                password TEXT,
-                created_at TEXT NOT NULL,
-                is_active INTEGER DEFAULT 1
+                nome TEXT NOT NULL,
+                criador TEXT NOT NULL,
+                senha TEXT,
+                criado_em TEXT NOT NULL,
+                esta_ativa INTEGER DEFAULT 1
             )
             ''')
 
-            # Criar tabela de mensagens se não existir
+            # Criar tabela de mensagens se não existir (versão nova com nomes em português)
             cursor.execute('''
-            CREATE TABLE IF NOT EXISTS messages (
+            CREATE TABLE IF NOT EXISTS mensagens (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                room_id TEXT NOT NULL,
-                username TEXT NOT NULL,
-                content TEXT NOT NULL,
-                timestamp TEXT NOT NULL,
-                FOREIGN KEY (room_id) REFERENCES rooms (id)
+                id_sala TEXT NOT NULL,
+                nome_usuario TEXT NOT NULL,
+                conteudo TEXT NOT NULL,
+                horario TEXT NOT NULL,
+                FOREIGN KEY (id_sala) REFERENCES salas (id)
             )
             ''')
 
-            conn.commit()
-            conn.close()
-            print("Database initialized successfully")
+            conexao.commit()
+            conexao.close()
+            print("Banco de dados inicializado com sucesso")
 
         except Exception as e:
             print(f"Erro ao inicializar banco de dados: {e}")
 
-    def load_rooms(self):
+    def carregar_salas(self):
         try:
-            conn = sqlite3.connect(self.db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
+            conexao = sqlite3.connect(self.caminho_bd)
+            conexao.row_factory = sqlite3.Row
+            cursor = conexao.cursor()
 
-            cursor.execute('SELECT * FROM rooms')
-            rows = cursor.fetchall()
+            cursor.execute('SELECT * FROM salas')
+            linhas = cursor.fetchall()
 
-            for row in rows:
-                room = Room(
-                    id=row['id'],
-                    name=row['name'],
-                    creator=row['creator'],
-                    created_at=row['created_at'],
-                    password=row['password'],
-                    is_active=bool(row['is_active'])
+            for linha in linhas:
+                sala = Sala(
+                    id=linha['id'],
+                    nome=linha['nome'],
+                    criador=linha['criador'],
+                    criado_em=linha['criado_em'],
+                    senha=linha['senha'],
+                    esta_ativa=bool(linha['esta_ativa'])
                 )
 
-                # Carregar mensagens para a sala
                 cursor.execute(
-                    'SELECT * FROM messages WHERE room_id = ? ORDER BY timestamp DESC LIMIT 50', (room.id,))
-                messages = cursor.fetchall()
+                    'SELECT * FROM mensagens WHERE id_sala = ? ORDER BY horario DESC LIMIT 50',
+                    (sala.id,))
+                mensagens = cursor.fetchall()
 
-                # Reverter para manter ordem cronológica
-                for msg in reversed(messages):
-                    room.messages.append({
-                        'username': msg['username'],
-                        'message': msg['content'],
-                        'timestamp': msg['timestamp']
+                for msg in reversed(mensagens):
+                    sala.mensagens.append({
+                        'nome_usuario': msg['nome_usuario'],
+                        'mensagem': msg['conteudo'],
+                        'horario': msg['horario']
                     })
 
-                self.rooms[room.id] = room
+                self.salas[sala.id] = sala
 
-            conn.close()
-            print(f"Loaded {len(self.rooms)} rooms from database")
+            conexao.close()
+            print(f"Carregadas {len(self.salas)} salas do banco de dados")
 
         except Exception as e:
             print(f"Erro ao carregar salas: {e}")
-            self.rooms = {}
+            self.salas = {}
 
-    def create_room(self, name, creator, password=None):
-        with self._lock:
+    def criar_sala(self, nome, criador, senha=None):
+        with self._trava:
             try:
                 # Gerar ID único
-                room_id = str(uuid.uuid4())[:8]
-                while room_id in self.rooms:  # Garantir unicidade
-                    room_id = str(uuid.uuid4())[:8]
+                id_sala = str(uuid.uuid4())[:8]
+                while id_sala in self.salas:  # Garantir unicidade
+                    id_sala = str(uuid.uuid4())[:8]
 
-                room = Room(room_id, name, creator, password=password)
+                sala = Sala(id_sala, nome, criador, senha=senha)
 
-                conn = sqlite3.connect(self.db_path)
-                cursor = conn.cursor()
+                conexao = sqlite3.connect(self.caminho_bd)
+                cursor = conexao.cursor()
 
                 cursor.execute(
-                    'INSERT INTO rooms (id, name, creator, password, created_at, is_active) VALUES (?, ?, ?, ?, ?, ?)',
-                    (room.id, room.name, room.creator,
-                     room.password, room.created_at, 1)
+                    'INSERT INTO salas (id, nome, criador, senha, criado_em, esta_ativa) VALUES (?, ?, ?, ?, ?, ?)',
+                    (sala.id, sala.nome, sala.criador,
+                     sala.senha, sala.criado_em, 1)
                 )
 
-                conn.commit()
-                conn.close()
+                conexao.commit()
+                conexao.close()
 
-                self.rooms[room_id] = room
-                print(f"Room created: {room_id} - {name}")
-                return room
+                self.salas[id_sala] = sala
+                print(f"Sala criada: {id_sala} - {nome}")
+                return sala
 
             except Exception as e:
                 print(f"Erro ao criar sala: {e}")
                 raise
 
-    def get_room(self, room_id):
-        return self.rooms.get(room_id)
+    def obter_sala(self, id_sala):
+        return self.salas.get(id_sala)
 
-    def get_all_rooms(self):
-        return list(self.rooms.values())
+    def obter_todas_salas(self):
+        return list(self.salas.values())
 
-    def delete_room(self, room_id):
-        with self._lock:
+    def excluir_sala(self, id_sala):
+        with self._trava:
             try:
-                if room_id in self.rooms:
-                    conn = sqlite3.connect(self.db_path)
-                    cursor = conn.cursor()
+                if id_sala in self.salas:
+                    conexao = sqlite3.connect(self.caminho_bd)
+                    cursor = conexao.cursor()
 
                     cursor.execute(
-                        'DELETE FROM messages WHERE room_id = ?', (room_id,))
+                        'DELETE FROM mensagens WHERE id_sala = ?', (id_sala,))
                     cursor.execute(
-                        'DELETE FROM rooms WHERE id = ?', (room_id,))
+                        'DELETE FROM salas WHERE id = ?', (id_sala,))
 
-                    conn.commit()
-                    conn.close()
+                    conexao.commit()
+                    conexao.close()
 
-                    del self.rooms[room_id]
-                    print(f"Room deleted: {room_id}")
+                    del self.salas[id_sala]
+                    print(f"Sala excluída: {id_sala}")
                     return True
                 return False
 
             except Exception as e:
-                print(f"Erro ao deletar sala: {e}")
+                print(f"Erro ao excluir sala: {e}")
                 return False
 
-    def verify_room_password(self, room_id, password):
-        room = self.get_room(room_id)
-        if not room:
+    def verificar_senha_sala(self, id_sala, senha):
+        sala = self.obter_sala(id_sala)
+        if not sala:
             return False
 
-        if not room.password:
+        if not sala.senha:
             return True
 
-        return room.password == password
+        return sala.senha == senha
 
-    def add_message_to_room(self, room_id, username, message):
+    def adicionar_mensagem_na_sala(self, id_sala, nome_usuario, mensagem):
         try:
-            room = self.get_room(room_id)
-            if not room:
+            sala = self.obter_sala(id_sala)
+            if not sala:
                 return False
 
-            timestamp = self.get_timestamp()
+            horario = self.obter_horario()
 
             # Adicionar à memória
-            room.add_message({
-                'username': username,
-                'message': message,
-                'timestamp': timestamp
+            sala.adicionar_mensagem({
+                'nome_usuario': nome_usuario,
+                'mensagem': mensagem,
+                'horario': horario
             })
 
             # Salvar no banco de dados
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
+            conexao = sqlite3.connect(self.caminho_bd)
+            cursor = conexao.cursor()
 
             cursor.execute(
-                'INSERT INTO messages (room_id, username, content, timestamp) VALUES (?, ?, ?, ?)',
-                (room_id, username, message, timestamp)
+                'INSERT INTO mensagens (id_sala, nome_usuario, conteudo, horario) VALUES (?, ?, ?, ?)',
+                (id_sala, nome_usuario, mensagem, horario)
             )
 
-            conn.commit()
-            conn.close()
+            conexao.commit()
+            conexao.close()
             return True
 
         except Exception as e:
             print(f"Erro ao adicionar mensagem: {e}")
             return False
 
-    def get_timestamp(self):
+    def obter_horario(self):
         return datetime.now().strftime('%H:%M:%S')
 
-    def cleanup_expired_rooms(self, timeout_hours=24):
+    def limpar_salas_expiradas(self, timeout_horas=24):
         """Remove salas inativas que expiraram"""
         try:
-            expired_ids = []
+            ids_expirados = []
 
-            for room_id, room in list(self.rooms.items()):
-                if room.is_expired(timeout_hours):
-                    expired_ids.append(room_id)
+            for id_sala, sala in list(self.salas.items()):
+                if sala.esta_expirada(timeout_horas):
+                    ids_expirados.append(id_sala)
 
-            for room_id in expired_ids:
+            for id_sala in ids_expirados:
                 # Não exclui do banco, apenas marca como inativo
-                conn = sqlite3.connect(self.db_path)
-                cursor = conn.cursor()
+                conexao = sqlite3.connect(self.caminho_bd)
+                cursor = conexao.cursor()
                 cursor.execute(
-                    'UPDATE rooms SET is_active = 0 WHERE id = ?', (room_id,))
-                conn.commit()
-                conn.close()
+                    'UPDATE salas SET esta_ativa = 0 WHERE id = ?', (id_sala,))
+                conexao.commit()
+                conexao.close()
 
                 # Atualiza o objeto em memória
-                self.rooms[room_id].is_active = False
+                self.salas[id_sala].esta_ativa = False
 
-            return len(expired_ids)
+            return len(ids_expirados)
 
         except Exception as e:
             print(f"Erro ao limpar salas expiradas: {e}")
             return 0
 
-    def get_stats(self):
+    def obter_estatisticas(self):
         """Retorna estatísticas para o painel de admin"""
         try:
-            active_rooms = sum(
-                1 for room in self.rooms.values() if room.is_active)
-            online_users = sum(len(room.users) for room in self.rooms.values())
+            salas_ativas = sum(
+                1 for sala in self.salas.values() if sala.esta_ativa)
+            usuarios_online = sum(len(sala.usuarios)
+                                  for sala in self.salas.values())
 
             return {
-                'total_rooms': len(self.rooms),
-                'active_rooms': active_rooms,
-                'online_users': online_users,
-                'recent_activity': self._get_recent_activity()
+                'total_salas': len(self.salas),
+                'salas_ativas': salas_ativas,
+                'usuarios_online': usuarios_online,
+                'atividade_recente': self._obter_atividade_recente()
             }
 
         except Exception as e:
             print(f"Erro ao obter estatísticas: {e}")
             return {
-                'total_rooms': 0,
-                'active_rooms': 0,
-                'online_users': 0,
-                'recent_activity': []
+                'total_salas': 0,
+                'salas_ativas': 0,
+                'usuarios_online': 0,
+                'atividade_recente': []
             }
 
-    def _get_recent_activity(self):
+    def _obter_atividade_recente(self):
         """Obtém atividade recente de todas as salas"""
         try:
-            recent = []
+            recente = []
 
-            conn = sqlite3.connect(self.db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
+            conexao = sqlite3.connect(self.caminho_bd)
+            conexao.row_factory = sqlite3.Row
+            cursor = conexao.cursor()
 
             cursor.execute('''
-                SELECT rooms.name, messages.username, messages.timestamp 
-                FROM messages JOIN rooms ON messages.room_id = rooms.id 
-                ORDER BY messages.timestamp DESC LIMIT 10
+                SELECT salas.nome, mensagens.nome_usuario, mensagens.horario
+                FROM mensagens JOIN salas ON mensagens.id_sala = salas.id
+                ORDER BY mensagens.horario DESC LIMIT 10
             ''')
 
-            activities = cursor.fetchall()
+            atividades = cursor.fetchall()
 
-            for activity in activities:
-                recent.append({
-                    'time': activity['timestamp'],
-                    'text': f"{activity['username']} enviou uma mensagem na sala {activity['name']}"
+            for atividade in atividades:
+                recente.append({
+                    'horario': atividade['horario'],
+                    'texto': f"{atividade['nome_usuario']} enviou uma mensagem na sala {atividade['nome']}"
                 })
 
-            conn.close()
-            return recent
+            conexao.close()
+            return recente
 
         except Exception as e:
             print(f"Erro ao obter atividade recente: {e}")
@@ -327,4 +327,4 @@ class RoomManager:
 
 
 # Instância global do gerenciador de salas
-room_manager = RoomManager()
+gerenciador_salas = GerenciadorSalas()

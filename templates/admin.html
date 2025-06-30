@@ -9,7 +9,7 @@
         <div class="col-md-3 col-lg-2">
             <div class="admin-sidebar">
                 <h4 class="text-white mb-4">
-                    <i class="fas fa-cogs me-2"></i>Admin Panel
+                    <i class="fas fa-cogs me-2"></i>Painel Admin
                 </h4>
                 <ul class="admin-nav">
                     <li>
@@ -18,12 +18,12 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#rooms" class="admin-nav-link" data-section="rooms">
+                        <a href="#salas" class="admin-nav-link" data-section="salas">
                             <i class="fas fa-comments me-2"></i>Salas
                         </a>
                     </li>
                     <li>
-                        <a href="#settings" class="admin-nav-link" data-section="settings">
+                        <a href="#configuracoes" class="admin-nav-link" data-section="configuracoes">
                             <i class="fas fa-cog me-2"></i>Configurações
                         </a>
                     </li>
@@ -37,7 +37,7 @@
             <div id="dashboard" class="admin-section">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2><i class="fas fa-chart-line me-2"></i>Dashboard</h2>
-                    <button class="btn btn-outline-primary" onclick="loadStats()">
+                    <button class="btn btn-outline-primary" onclick="carregarEstatisticas()">
                         <i class="fas fa-sync-alt me-1"></i>Atualizar
                     </button>
                 </div>
@@ -45,15 +45,15 @@
                 <!-- Stats Cards -->
                 <div class="stat-cards mb-4">
                     <div class="stat-card">
-                        <div class="stat-number" id="totalRooms">-</div>
+                        <div class="stat-number" id="totalSalas">-</div>
                         <div class="stat-label">Total de Salas</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="activeRooms">-</div>
+                        <div class="stat-number" id="salasAtivas">-</div>
                         <div class="stat-label">Salas Ativas</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number" id="onlineUsers">-</div>
+                        <div class="stat-number" id="usuariosOnline">-</div>
                         <div class="stat-label">Usuários Online</div>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div id="recentActivity">
+                        <div id="atividadeRecente">
                             <div class="text-center p-3">
                                 <div class="loading"></div>
                                 <p class="mt-2 mb-0">Carregando atividades...</p>
@@ -77,18 +77,18 @@
             </div>
 
             <!-- Rooms Section -->
-            <div id="rooms" class="admin-section" style="display: none;">
+            <div id="salas" class="admin-section" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2><i class="fas fa-comments me-2"></i>Gerenciar Salas</h2>
-                    <button class="btn btn-outline-primary" onclick="loadRooms()">
-                        <i class="fas fa-sync-alt me-1"></i>Atualizar
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="carregarSalas()" title="Atualizar lista de salas">
+                        <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
 
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover" id="roomsTable">
+                            <table class="table table-hover" id="tabelaSalas">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -116,7 +116,7 @@
             </div>
 
             <!-- Settings Section -->
-            <div id="settings" class="admin-section" style="display: none;">
+            <div id="configuracoes" class="admin-section" style="display: none;">
                 <h2 class="mb-4"><i class="fas fa-cog me-2"></i>Configurações</h2>
 
                 <div class="row">
@@ -126,20 +126,20 @@
                                 <h5 class="mb-0">Configurações do Servidor</h5>
                             </div>
                             <div class="card-body">
-                                <form id="settingsForm">
+                                <form id="formularioConfiguracoes">
                                     <div class="mb-3">
-                                        <label for="adminPassword" class="form-label">Senha de Admin</label>
-                                        <input type="password" class="form-control" id="adminPassword" placeholder="Digite a senha atual">
+                                        <label for="senhaAdmin" class="form-label">Senha de Admin</label>
+                                        <input type="password" class="form-control" id="senhaAdmin" placeholder="Digite a senha atual">
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label for="maxRooms" class="form-label">Máximo de Salas</label>
-                                        <input type="number" class="form-control" id="maxRooms" min="1" value="50">
+                                        <label for="maximoSalas" class="form-label">Máximo de Salas</label>
+                                        <input type="number" class="form-control" id="maximoSalas" min="1" value="50">
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label for="roomTimeout" class="form-label">Timeout de Sala (horas)</label>
-                                        <input type="number" class="form-control" id="roomTimeout" min="1" value="24">
+                                        <label for="timeoutSala" class="form-label">Timeout de Sala (horas)</label>
+                                        <input type="number" class="form-control" id="timeoutSala" min="1" value="24">
                                     </div>
                                     
                                     <button type="submit" class="btn btn-primary">
@@ -157,13 +157,13 @@
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-warning" onclick="cleanupExpiredRooms()">
+                                    <button class="btn btn-warning" onclick="limparSalasExpiradas()">
                                         <i class="fas fa-broom me-1"></i>Limpar Salas Expiradas
                                     </button>
-                                    <button class="btn btn-info" onclick="exportData()">
+                                    <button class="btn btn-info" onclick="exportarDados()">
                                         <i class="fas fa-download me-1"></i>Exportar Dados
                                     </button>
-                                    <button class="btn btn-danger" onclick="clearAllData()">
+                                    <button class="btn btn-danger" onclick="limparTodosDados()">
                                         <i class="fas fa-trash me-1"></i>Limpar Todos os Dados
                                     </button>
                                 </div>
@@ -181,105 +181,105 @@
 <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Navigation
-    const navLinks = document.querySelectorAll('.admin-nav-link');
-    const sections = document.querySelectorAll('.admin-section');
+    // Navegação
+    const linksNavegacao = document.querySelectorAll('.admin-nav-link');
+    const secoes = document.querySelectorAll('.admin-section');
     
-    navLinks.forEach(link => {
+    linksNavegacao.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Update active nav
-            navLinks.forEach(l => l.classList.remove('active'));
+            // Atualizar navegação ativa
+            linksNavegacao.forEach(l => l.classList.remove('active'));
             this.classList.add('active');
             
-            // Show section
-            const sectionId = this.dataset.section;
-            sections.forEach(section => {
-                section.style.display = section.id === sectionId ? 'block' : 'none';
+            // Mostrar seção
+            const idSecao = this.dataset.section;
+            secoes.forEach(secao => {
+                secao.style.display = secao.id === idSecao ? 'block' : 'none';
             });
         });
     });
     
-    // Initial load
-    loadStats();
-    loadRooms();
+    // Carregamento inicial
+    carregarEstatisticas();
+    carregarSalas();
     
-    // Form handler
-    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+    // Manipulador de formulário
+    document.getElementById('formularioConfiguracoes').addEventListener('submit', function(e) {
         e.preventDefault();
-        saveSettings();
+        salvarConfiguracoes();
     });
     
-    // Auto refresh every 30 seconds
+    // Atualização automática a cada 30 segundos
     setInterval(() => {
-        loadStats();
-        loadRooms();
+        carregarEstatisticas();
+        carregarSalas();
     }, 30000);
 });
 
-function loadStats() {
-    fetch('/api/admin/stats')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('totalRooms').textContent = data.total_rooms || 0;
-            document.getElementById('activeRooms').textContent = data.active_rooms || 0;
-            document.getElementById('onlineUsers').textContent = data.online_users || 0;
+function carregarEstatisticas() {
+    fetch('/api/admin/estatisticas')
+        .then(resposta => resposta.json())
+        .then(dados => {
+            document.getElementById('totalSalas').textContent = dados.total_salas || 0;
+            document.getElementById('salasAtivas').textContent = dados.salas_ativas || 0;
+            document.getElementById('usuariosOnline').textContent = dados.usuarios_online || 0;
             
-            const activityContainer = document.getElementById('recentActivity');
-            if (data.recent_activity && data.recent_activity.length > 0) {
-                activityContainer.innerHTML = data.recent_activity.map(activity => `
+            const containerAtividade = document.getElementById('atividadeRecente');
+            if (dados.atividade_recente && dados.atividade_recente.length > 0) {
+                containerAtividade.innerHTML = dados.atividade_recente.map(atividade => `
                     <div class="d-flex align-items-center p-2 border-bottom">
                         <div class="me-3">
                             <i class="fas fa-clock text-muted"></i>
                         </div>
                         <div>
-                            <small class="text-muted">${activity.time}</small>
-                            <div>${activity.text}</div>
+                            <small class="text-muted">${atividade.horario}</small>
+                            <div>${atividade.texto}</div>
                         </div>
                     </div>
                 `).join('');
             } else {
-                activityContainer.innerHTML = '<p class="text-muted text-center p-3">Nenhuma atividade recente</p>';
+                containerAtividade.innerHTML = '<p class="text-muted text-center p-3">Nenhuma atividade recente</p>';
             }
         })
-        .catch(error => {
-            console.error('Erro ao carregar estatísticas:', error);
-            showAlert('Erro ao carregar estatísticas', 'danger');
+        .catch(erro => {
+            console.error('Erro ao carregar estatísticas:', erro);
+            mostrarAlerta('Erro ao carregar estatísticas', 'danger');
         });
 }
 
-function loadRooms() {
-    fetch('/api/rooms')
-        .then(response => response.json())
-        .then(rooms => {
-            const tbody = document.querySelector('#roomsTable tbody');
+function carregarSalas() {
+    fetch('/api/salas')
+        .then(resposta => resposta.json())
+        .then(salas => {
+            const tbody = document.querySelector('#tabelaSalas tbody');
             
-            if (rooms.length === 0) {
+            if (salas.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center p-4">Nenhuma sala encontrada</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = rooms.map(room => `
+            tbody.innerHTML = salas.map(sala => `
                 <tr>
-                    <td><code>${room.id}</code></td>
-                    <td>${room.name}</td>
-                    <td>${room.creator}</td>
-                    <td>${formatDate(room.created_at)}</td>
+                    <td><code>${sala.id}</code></td>
+                    <td>${sala.nome}</td>
+                    <td>${sala.criador}</td>
+                    <td>${formatarData(sala.criado_em)}</td>
                     <td>
-                        <span class="badge ${room.is_active ? 'bg-success' : 'bg-secondary'}">
-                            ${room.is_active ? 'Ativa' : 'Inativa'}
+                        <span class="badge ${sala.esta_ativa ? 'bg-success' : 'bg-secondary'}">
+                            ${sala.esta_ativa ? 'Ativa' : 'Inativa'}
                         </span>
-                        ${room.has_password ? '<i class="fas fa-lock text-warning ms-1" title="Protegida por senha"></i>' : ''}
+                        ${sala.tem_senha ? '<i class="fas fa-lock text-warning ms-1" title="Protegida por senha"></i>' : ''}
                     </td>
-                    <td>${room.user_count || 0}</td>
-                    <td>${room.message_count || 0}</td>
+                    <td>${sala.contador_usuarios || 0}</td>
+                    <td>${sala.contador_mensagens || 0}</td>
                     <td>
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary" onclick="viewRoom('${room.id}')" title="Visualizar">
+                            <button class="btn btn-outline-primary" onclick="visualizarSala('${sala.id}')" title="Visualizar">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-outline-danger" onclick="deleteRoom('${room.id}')" title="Excluir">
+                            <button class="btn btn-outline-danger" onclick="excluirSala('${sala.id}')" title="Excluir">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -287,107 +287,107 @@ function loadRooms() {
                 </tr>
             `).join('');
         })
-        .catch(error => {
-            console.error('Erro ao carregar salas:', error);
-            showAlert('Erro ao carregar salas', 'danger');
+        .catch(erro => {
+            console.error('Erro ao carregar salas:', erro);
+            mostrarAlerta('Erro ao carregar salas', 'danger');
         });
 }
 
-function viewRoom(roomId) {
-    window.open(`/chat/${roomId}?username=Admin`, '_blank');
+function visualizarSala(idSala) {
+    window.open(`/chat/${idSala}?username=Admin`, '_blank');
 }
 
-function deleteRoom(roomId) {
+function excluirSala(idSala) {
     if (!confirm('Tem certeza que deseja excluir esta sala? Esta ação não pode ser desfeita.')) {
         return;
     }
     
-    fetch(`/api/admin/rooms/${roomId}`, {
+    fetch(`/api/admin/salas/${idSala}`, {
         method: 'DELETE'
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            showAlert(data.error, 'danger');
+    .then(resposta => resposta.json())
+    .then(dados => {
+        if (dados.erro) {
+            mostrarAlerta(dados.erro, 'danger');
         } else {
-            showAlert('Sala excluída com sucesso!', 'success');
-            loadRooms();
-            loadStats();
+            mostrarAlerta('Sala excluída com sucesso!', 'success');
+            carregarSalas();
+            carregarEstatisticas();
         }
     })
-    .catch(error => {
-        console.error('Erro ao excluir sala:', error);
-        showAlert('Erro ao excluir sala', 'danger');
+    .catch(erro => {
+        console.error('Erro ao excluir sala:', erro);
+        mostrarAlerta('Erro ao excluir sala', 'danger');
     });
 }
 
-function saveSettings() {
-    const formData = {
-        admin_password: document.getElementById('adminPassword').value,
-        max_rooms: document.getElementById('maxRooms').value,
-        room_timeout: document.getElementById('roomTimeout').value
+function salvarConfiguracoes() {
+    const dadosFormulario = {
+        senha_admin: document.getElementById('senhaAdmin').value,
+        maximo_salas: document.getElementById('maximoSalas').value,
+        timeout_sala: document.getElementById('timeoutSala').value
     };
     
-    fetch('/api/admin/settings', {
+    fetch('/api/admin/configuracoes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dadosFormulario)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            showAlert(data.error, 'danger');
+    .then(resposta => resposta.json())
+    .then(dados => {
+        if (dados.erro) {
+            mostrarAlerta(dados.erro, 'danger');
         } else {
-            showAlert('Configurações salvas com sucesso!', 'success');
-            document.getElementById('adminPassword').value = '';
+            mostrarAlerta('Configurações salvas com sucesso!', 'success');
+            document.getElementById('senhaAdmin').value = '';
         }
     })
-    .catch(error => {
-        console.error('Erro ao salvar configurações:', error);
-        showAlert('Erro ao salvar configurações', 'danger');
+    .catch(erro => {
+        console.error('Erro ao salvar configurações:', erro);
+        mostrarAlerta('Erro ao salvar configurações', 'danger');
     });
 }
 
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
+function formatarData(stringData) {
+    if (!stringData) return 'N/A';
     try {
-        return new Date(dateString).toLocaleString('pt-BR');
+        return new Date(stringData).toLocaleString('pt-BR');
     } catch {
-        return dateString;
+        return stringData;
     }
 }
 
-function showAlert(message, type) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    alertDiv.innerHTML = `
-        ${message}
+function mostrarAlerta(mensagem, tipo) {
+    const divAlerta = document.createElement('div');
+    divAlerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+    divAlerta.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    divAlerta.innerHTML = `
+        ${mensagem}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     
-    document.body.appendChild(alertDiv);
+    document.body.appendChild(divAlerta);
     
     setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
+        if (divAlerta.parentNode) {
+            divAlerta.remove();
         }
     }, 5000);
 }
 
-function cleanupExpiredRooms() {
+function limparSalasExpiradas() {
     if (confirm('Limpar todas as salas expiradas?')) {
-        showAlert('Funcionalidade em desenvolvimento', 'info');
+        mostrarAlerta('Funcionalidade em desenvolvimento', 'info');
     }
 }
 
-function exportData() {
-    showAlert('Funcionalidade em desenvolvimento', 'info');
+function exportarDados() {
+    mostrarAlerta('Funcionalidade em desenvolvimento', 'info');
 }
 
-function clearAllData() {
+function limparTodosDados() {
     if (confirm('ATENÇÃO: Isso irá excluir TODOS os dados! Tem certeza?')) {
-        showAlert('Funcionalidade em desenvolvimento', 'info');
+        mostrarAlerta('Funcionalidade em desenvolvimento', 'info');
     }
 }
 </script>

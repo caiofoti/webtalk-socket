@@ -21,7 +21,7 @@
                         <span class="badge bg-light text-dark me-2">
                             <i class="fas fa-hashtag"></i> {{ room.id }}
                         </span>
-                        <button id="leaveRoom" class="btn btn-outline-light">
+                        <button id="sairSala" class="btn btn-outline-light">
                             <i class="fas fa-sign-out-alt me-1"></i>Sair
                         </button>
                     </div>
@@ -31,7 +31,7 @@
             <!-- Chat Container -->
             <div class="chat-container">
                 <!-- Messages Area -->
-                <div class="chat-messages" id="chatMessages">
+                <div class="chat-messages" id="mensagensChat">
                     <div class="text-center text-muted p-4">
                         <i class="fas fa-comments fa-3x mb-3 opacity-50"></i>
                         <p>Início da conversa</p>
@@ -41,17 +41,17 @@
                 <!-- Input Area -->
                 <div class="chat-input-container">
                     <div class="input-group">
-                        <input type="text" id="messageInput" class="form-control" placeholder="Digite sua mensagem..." maxlength="500">
-                        <buttonbutton id="sendButton" class="btn btn-primary" type="button" title="Enviar mensagem">
+                        <input type="text" id="entradaMensagem" class="form-control" placeholder="Digite sua mensagem..." maxlength="500">
+                        <button id="botaoEnviar" class="btn btn-primary" type="button" title="Enviar mensagem">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-2">
                         <small class="text-muted">
-                            <i class="fas fa-user me-1"></i>Conectado como: <strong id="currentUsername"></strong>
+                            <i class="fas fa-user me-1"></i>Conectado como: <strong id="nomeUsuarioAtual"></strong>
                         </small>
                         <small class="text-muted">
-                            <span id="charCount">0</span>/500
+                            <span id="contadorCaracteres">0</span>/500
                         </small>
                     </div>
                 </div>
@@ -63,155 +63,155 @@
 
 {% block script %}
 <script>
-const urlParams = new URLSearchParams(window.location.search);
-const username = urlParams.get('username') || localStorage.getItem('chatUsername');
-const roomId = '{{ room.id }}';
+const parametrosUrl = new URLSearchParams(window.location.search);
+const nomeUsuario = parametrosUrl.get('username') || localStorage.getItem('nomeUsuarioChat');
+const idSala = '{{ room.id }}';
 let socket;
 
 // Verificar se o usuário tem um nome
-if (!username) {
-    const newUsername = prompt('Digite seu nome para entrar no chat:');
-    if (!newUsername) {
+if (!nomeUsuario) {
+    const novoNomeUsuario = prompt('Digite seu nome para entrar no chat:');
+    if (!novoNomeUsuario) {
         window.location.href = '/';
     } else {
-        localStorage.setItem('chatUsername', newUsername);
-        window.location.search = `username=${encodeURIComponent(newUsername)}`;
+        localStorage.setItem('nomeUsuarioChat', novoNomeUsuario);
+        window.location.search = `username=${encodeURIComponent(novoNomeUsuario)}`;
     }
 } else {
-    document.getElementById('currentUsername').textContent = username;
-    initializeChat();
+    document.getElementById('nomeUsuarioAtual').textContent = nomeUsuario;
+    inicializarChat();
 }
 
-function initializeChat() {
+function inicializarChat() {
     socket = io();
     
-    // Socket events
+    // Eventos do Socket
     socket.on('connect', function() {
         console.log('Conectado ao servidor');
-        socket.emit('join', {
-            room_id: roomId,
-            username: username
+        socket.emit('entrar', {
+            id_sala: idSala,
+            nome_usuario: nomeUsuario
         });
-        addSystemMessage(`Você entrou na sala como ${username}`);
+        adicionarMensagemSistema(`Você entrou na sala como ${nomeUsuario}`);
     });
     
     socket.on('disconnect', function() {
-        addSystemMessage('Conexão perdida. Tentando reconectar...');
+        adicionarMensagemSistema('Conexão perdida. Tentando reconectar...');
     });
     
-    socket.on('user_joined', function(data) {
-        if (data.username !== username) {
-            addSystemMessage(`${data.username} entrou na sala`);
+    socket.on('usuario_entrou', function(dados) {
+        if (dados.nome_usuario !== nomeUsuario) {
+            adicionarMensagemSistema(`${dados.nome_usuario} entrou na sala`);
         }
     });
     
-    socket.on('user_left', function(data) {
-        addSystemMessage(`${data.username} saiu da sala`);
+    socket.on('usuario_saiu', function(dados) {
+        adicionarMensagemSistema(`${dados.nome_usuario} saiu da sala`);
     });
     
-    socket.on('chat_message', function(data) {
-        addMessage(data);
+    socket.on('mensagem_chat', function(dados) {
+        adicionarMensagem(dados);
     });
     
-    // UI event listeners
-    document.getElementById('sendButton').addEventListener('click', sendMessage);
-    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+    // Eventos da interface
+    document.getElementById('botaoEnviar').addEventListener('click', enviarMensagem);
+    document.getElementById('entradaMensagem').addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            sendMessage();
+            enviarMensagem();
         }
     });
     
-    document.getElementById('messageInput').addEventListener('input', function() {
-        const charCount = this.value.length;
-        document.getElementById('charCount').textContent = charCount;
+    document.getElementById('entradaMensagem').addEventListener('input', function() {
+        const contadorCaracteres = this.value.length;
+        document.getElementById('contadorCaracteres').textContent = contadorCaracteres;
         
-        if (charCount > 450) {
-            document.getElementById('charCount').style.color = '#e74c3c';
+        if (contadorCaracteres > 450) {
+            document.getElementById('contadorCaracteres').style.color = '#e74c3c';
         } else {
-            document.getElementById('charCount').style.color = '#6c757d';
+            document.getElementById('contadorCaracteres').style.color = '#6c757d';
         }
     });
     
-    document.getElementById('leaveRoom').addEventListener('click', function() {
+    document.getElementById('sairSala').addEventListener('click', function() {
         if (confirm('Tem certeza que deseja sair da sala?')) {
-            socket.emit('leave', {
-                room_id: roomId,
-                username: username
+            socket.emit('sair', {
+                id_sala: idSala,
+                nome_usuario: nomeUsuario
             });
-            localStorage.removeItem('chatUsername');
+            localStorage.removeItem('nomeUsuarioChat');
             window.location.href = '/';
         }
     });
 }
 
-function sendMessage() {
-    const input = document.getElementById('messageInput');
-    const message = input.value.trim();
+function enviarMensagem() {
+    const entrada = document.getElementById('entradaMensagem');
+    const mensagem = entrada.value.trim();
     
-    if (message && socket) {
-        socket.emit('chat_message', {
-            room_id: roomId,
-            username: username,
-            message: message
+    if (mensagem && socket) {
+        socket.emit('mensagem_chat', {
+            id_sala: idSala,
+            nome_usuario: nomeUsuario,
+            mensagem: mensagem
         });
-        input.value = '';
-        document.getElementById('charCount').textContent = '0';
-        document.getElementById('charCount').style.color = '#6c757d';
+        entrada.value = '';
+        document.getElementById('contadorCaracteres').textContent = '0';
+        document.getElementById('contadorCaracteres').style.color = '#6c757d';
     }
 }
 
-function addMessage(data) {
-    const messagesContainer = document.getElementById('chatMessages');
-    const messageDiv = document.createElement('div');
-    const isOwn = data.username === username;
+function adicionarMensagem(dados) {
+    const containerMensagens = document.getElementById('mensagensChat');
+    const divMensagem = document.createElement('div');
+    const ehPropria = dados.nome_usuario === nomeUsuario;
     
-    messageDiv.className = `message ${isOwn ? 'message-own' : 'message-other'}`;
+    divMensagem.className = `message ${ehPropria ? 'message-own' : 'message-other'}`;
     
-    const messageTime = new Date().toLocaleTimeString('pt-BR', {
+    const horarioMensagem = new Date().toLocaleTimeString('pt-BR', {
         hour: '2-digit',
         minute: '2-digit'
     });
     
-    messageDiv.innerHTML = `
+    divMensagem.innerHTML = `
         <div class="message-header">
-            ${!isOwn ? `<strong>${data.username}</strong> • ` : ''}${data.timestamp || messageTime}
+            ${!ehPropria ? `<strong>${dados.nome_usuario}</strong> • ` : ''}${dados.horario || horarioMensagem}
         </div>
         <div class="message-bubble">
-            ${escapeHtml(data.message)}
+            ${escaparHtml(dados.mensagem)}
         </div>
     `;
     
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    containerMensagens.appendChild(divMensagem);
+    containerMensagens.scrollTop = containerMensagens.scrollHeight;
 }
 
-function addSystemMessage(text) {
-    const messagesContainer = document.getElementById('chatMessages');
-    const messageDiv = document.createElement('div');
+function adicionarMensagemSistema(texto) {
+    const containerMensagens = document.getElementById('mensagensChat');
+    const divMensagem = document.createElement('div');
     
-    messageDiv.className = 'message message-system';
-    messageDiv.innerHTML = `
+    divMensagem.className = 'message message-system';
+    divMensagem.innerHTML = `
         <div class="message-bubble">
-            <i class="fas fa-info-circle me-1"></i>${escapeHtml(text)}
+            <i class="fas fa-info-circle me-1"></i>${escaparHtml(texto)}
         </div>
     `;
     
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    containerMensagens.appendChild(divMensagem);
+    containerMensagens.scrollTop = containerMensagens.scrollHeight;
 }
 
-function escapeHtml(text) {
+function escaparHtml(texto) {
     const div = document.createElement('div');
-    div.textContent = text;
+    div.textContent = texto;
     return div.innerHTML;
 }
 
-// Auto-focus on message input
+// Foco automático na entrada de mensagem
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        const input = document.getElementById('messageInput');
-        if (input) input.focus();
+        const entrada = document.getElementById('entradaMensagem');
+        if (entrada) entrada.focus();
     }, 500);
 });
 </script>
