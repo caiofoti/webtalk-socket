@@ -6,6 +6,7 @@ from socketio_handlers import registrar_eventos_socketio
 
 
 def criar_aplicacao():
+    """Cria e configura a aplicação Flask"""
     app = Flask(__name__)
     app.config.from_object(Config)
 
@@ -25,10 +26,11 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 registrar_eventos_socketio(socketio)
 
 if __name__ == '__main__':
-    print("🚀 WebTalk Socket iniciado!")
-    print(f"📍 Acesse: http://localhost:{Config.PORT}")
-    print(f"🔧 Admin: http://localhost:{Config.PORT}/admin")
-    print(f"🔑 Senha admin: {Config.ADMIN_PASSWORD}")
+    print("[INFO] Iniciando servidor WebTalk Socket")
+    print(f"[INFO] Servidor disponível em: http://localhost:{Config.PORT}")
+    print(
+        f"[INFO] Painel administrativo: http://localhost:{Config.PORT}/admin")
+    print(f"[INFO] Senha de administrador: {Config.ADMIN_PASSWORD}")
 
     socketio.run(app,
                  host=Config.HOST,

@@ -6,11 +6,13 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def index():
+    """Renderiza página inicial da aplicação"""
     return render_template('index.html')
 
 
 @main_bp.route('/chat/<id_sala>')
 def chat(id_sala):
+    """Renderiza interface de chat para sala específica"""
     sala = gerenciador_salas.obter_sala(id_sala)
     if not sala:
         return render_template('index.html', erro='Sala não encontrada!')
@@ -19,17 +21,19 @@ def chat(id_sala):
 
 @main_bp.route('/api/salas', methods=['GET'])
 def obter_salas():
+    """API endpoint para listar todas as salas ativas"""
     try:
         salas = [sala.para_dicionario()
                  for sala in gerenciador_salas.obter_todas_salas() if sala.esta_ativa]
         return jsonify(salas)
     except Exception as e:
-        print(f"Erro ao buscar salas: {e}")
+        print(f"[API ERROR] Falha ao buscar salas: {e}")
         return jsonify({'erro': 'Erro interno do servidor'}), 500
 
 
 @main_bp.route('/api/salas', methods=['POST'])
 def criar_sala():
+    """API endpoint para criação de nova sala de chat"""
     try:
         dados = request.json
         if not dados:
@@ -38,8 +42,7 @@ def criar_sala():
         nome = dados.get('nome', '').strip() if dados.get('nome') else ''
         criador = dados.get('criador', '').strip(
         ) if dados.get('criador') else ''
-        senha = dados.get('senha', '').strip(
-        ) if dados.get('senha') else None
+        senha = dados.get('senha', '').strip() if dados.get('senha') else None
 
         if not nome or not criador:
             return jsonify({'erro': 'Nome da sala e criador são obrigatórios'}), 400
@@ -55,16 +58,16 @@ def criar_sala():
         return jsonify({'id_sala': sala.id, 'mensagem': 'Sala criada com sucesso!'})
 
     except Exception as e:
-        print(f"Erro ao criar sala: {e}")
+        print(f"[API ERROR] Falha ao criar sala: {e}")
         return jsonify({'erro': 'Erro interno do servidor'}), 500
 
 
 @main_bp.route('/api/salas/<id_sala>/entrar', methods=['POST'])
 def entrar_sala(id_sala):
+    """API endpoint para validação de acesso à sala"""
     try:
         dados = request.json or {}
-        senha = dados.get('senha', '').strip(
-        ) if dados.get('senha') else ''
+        senha = dados.get('senha', '').strip() if dados.get('senha') else ''
 
         sala = gerenciador_salas.obter_sala(id_sala)
         if not sala:
@@ -79,5 +82,5 @@ def entrar_sala(id_sala):
         return jsonify({'mensagem': 'Acesso autorizado!'})
 
     except Exception as e:
-        print(f"Erro ao entrar na sala: {e}")
+        print(f"[API ERROR] Falha ao processar entrada na sala: {e}")
         return jsonify({'erro': 'Erro interno do servidor'}), 500

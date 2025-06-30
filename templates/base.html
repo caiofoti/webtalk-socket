@@ -6,31 +6,84 @@
     <title>{% block title %}WebTalk Socket{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     {% block head %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">
-                <i class="fas fa-comments me-2"></i>WebTalk Socket
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}" title="Página inicial">
+                <img src="{{ url_for('static', filename='images/ufcspa-logo.png') }}" 
+                     alt="Logo UFCSPA" 
+                     class="university-logo" 
+                     onerror="this.style.display='none'">
+                <div>
+                    <div class="brand-title">WebTalk Socket</div>
+                    <div class="brand-subtitle">UFCSPA • Informática Biomédica • Fundamentos de Redes e Sistemas Distribuídos</div>
+                </div>
             </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="{{ url_for('main.index') }}">
-                    <i class="fas fa-home me-1"></i>Início
-                </a>
-                <a class="nav-link" href="{{ url_for('admin.admin') }}">
-                    <i class="fas fa-cog me-1"></i>Admin
+            <div class="d-flex gap-2">
+                <button type="button" 
+                        class="nav-button" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#infoModal"
+                        title="Informações do projeto">
+                    <i class="fas fa-info-circle"></i>
+                    Sobre
+                </button>
+                <a href="{{ url_for('admin.admin') }}" 
+                   class="nav-button admin-btn"
+                   title="Painel administrativo">
+                    <i class="fas fa-cog"></i>
+                    Admin
                 </a>
             </div>
         </div>
     </nav>
 
-    <main class="container-fluid py-4">
+    <main>
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Info Modal - Simplified -->
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">Sobre o Projeto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        O <strong>WebTalk Socket</strong> é uma aplicação de comunicação em tempo real desenvolvida como 
+                        <strong>trabalho prático</strong> da disciplina de <strong>Fundamentos de Redes e Sistemas Distribuídos</strong> 
+                        do curso de <strong>Bacharelado em Informática Biomédica</strong> da <strong>UFCSPA</strong> 
+                        (Universidade Federal de Ciências da Saúde de Porto Alegre).
+                    </p>
+                    <p>
+                        O sistema implementa uma <strong>arquitetura cliente-servidor</strong> baseada em 
+                        <strong>web services REST/RESTful</strong>, demonstrando conceitos fundamentais de 
+                        <strong>sistemas distribuídos</strong> e <strong>comunicação em rede</strong>. 
+                        Permite a criação de <strong>salas de chat</strong> com suporte a <strong>mensagens de texto</strong> 
+                        e futuramente <strong>troca de documentos</strong> nos formatos JPEG, JPG, PNG e PDF.
+                    </p>
+                    <p>
+                        <strong>Tecnologias utilizadas:</strong> Backend desenvolvido em <strong>Python</strong> 
+                        com <strong>Flask</strong> para APIs REST e <strong>Socket.IO</strong> para comunicação 
+                        em tempo real. Frontend implementado com <strong>HTML5</strong>, <strong>CSS3</strong>, 
+                        <strong>Bootstrap 5</strong> e <strong>JavaScript ES6+</strong> com conectividade 
+                        <strong>WebSocket</strong> para interação bidirecional.
+                    </p>
+                    <p>
+                        <strong>Equipe:</strong> Bruno Costa E Silva Giuliani Lopes, Caio Foti Pontes e 
+                        Tainá Machado Selayaran. <strong>Orientação:</strong> Prof. João Gluz.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block script %}{% endblock %}

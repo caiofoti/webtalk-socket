@@ -1,142 +1,268 @@
 {% extends "base.html" %}
 
-{% block title %}WebTalk Socket - Salas de Chat{% endblock %}
+{% block title %}WebTalk Socket - Sistema Distribuído{% endblock %}
 
 {% block content %}
-<div class="container">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h1 class="display-4 mb-3">
-                        <i class="fas fa-comments text-primary"></i>
-                        WebTalk Socket
-                    </h1>
-                    <p class="lead">Entre em uma sala existente ou crie sua própria sala para conversar em tempo real.</p>
+<div class="main-container">
+    <div class="content-wrapper">
+        <div class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Salas de Comunicação Disponíveis</h1>
+            </div>
+            
+            <div class="content-body">
+                <div class="controls-section">
+                    <div class="controls-row">
+                        <div class="controls-left">
+                            <input type="text" 
+                                   id="searchInput" 
+                                   class="search-input" 
+                                   placeholder="Buscar por nome da sala ou criador..."
+                                   title="Buscar salas por nome ou criador"
+                                   aria-label="Campo de busca para filtrar salas">
+                            <select id="filterStatus" 
+                                    class="filter-select"
+                                    title="Filtrar salas por tipo de acesso"
+                                    aria-label="Filtro para tipo de sala">
+                                <option value="all">Todas as salas</option>
+                                <option value="public">Apenas públicas</option>
+                                <option value="protected">Apenas protegidas</option>
+                            </select>
+                        </div>
+                        <div class="controls-right">
+                            <button type="button" 
+                                    class="btn-control small" 
+                                    onclick="carregarSalas()"
+                                    title="Atualizar lista de salas"
+                                    aria-label="Atualizar lista de salas disponíveis">
+                                <i class="fas fa-sync-alt" aria-hidden="true"></i> Atualizar
+                            </button>
+                            <button type="button" 
+                                    class="btn-control" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#criarSalaModal"
+                                    title="Criar nova sala de chat"
+                                    aria-label="Abrir modal para criar nova sala">
+                                <i class="fas fa-plus" aria-hidden="true"></i> Criar Sala
+                            </button>
+                            <button type="button" 
+                                    class="btn-control secondary" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#entrarSalaModal"
+                                    title="Acessar sala por código"
+                                    aria-label="Abrir modal para acessar sala por código">
+                                <i class="fas fa-sign-in-alt" aria-hidden="true"></i> Acessar por Código
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rooms-section">
+                    <div class="rooms-table-container">
+                        <table class="rooms-table" id="roomsTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Sala</th>
+                                    <th scope="col">Código</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Atividade</th>
+                                    <th scope="col">Criada em</th>
+                                    <th scope="col">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roomsTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center" style="padding: 2rem;">
+                                        <div class="loading" aria-label="Carregando"></div>
+                                        <div style="margin-top: 0.5rem;">Carregando salas...</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="pagination-section">
+                        <div class="pagination-info">
+                            <div class="pagination-text" id="paginationInfo">
+                                Mostrando 0 de 0 salas
+                            </div>
+                            <div class="pagination-controls" id="paginationControls">
+                                <button class="page-btn" 
+                                        id="prevBtn" 
+                                        onclick="mudarPagina(-1)" 
+                                        disabled
+                                        title="Página anterior"
+                                        aria-label="Ir para página anterior">
+                                    <i class="fas fa-chevron-left" aria-hidden="true"></i> Anterior
+                                </button>
+                                <span id="pageNumbers" role="navigation" aria-label="Páginas disponíveis"></span>
+                                <button class="page-btn" 
+                                        id="nextBtn" 
+                                        onclick="mudarPagina(1)" 
+                                        disabled
+                                        title="Próxima página"
+                                        aria-label="Ir para próxima página">
+                                    Próxima <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row">
-        <!-- Create Room Section -->
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Criar Nova Sala</h5>
-                </div>
-                <div class="card-body">
-                    <form id="formularioCriarSala">
-                        <div class="mb-3">
-                            <label for="nomeSala" class="form-label">Nome da Sala</label>
-                            <input type="text" class="form-control" id="nomeSala" placeholder="Digite o nome da sala" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="nomeCriador" class="form-label">Seu Nome</label>
-                            <input type="text" class="form-control" id="nomeCriador" placeholder="Digite seu nome" required autocomplete="username">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="senhaSala" class="form-label">Senha (Opcional)</label>
-                            <input type="password" class="form-control" id="senhaSala" placeholder="Senha para sala privada" autocomplete="new-password">
-                            <div class="form-text">Deixe em branco para sala pública</div>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-plus me-2"></i>Criar Sala
-                        </button>
-                    </form>
-                </div>
+<!-- Create Room Modal -->
+<div class="modal fade" id="criarSalaModal" tabindex="-1" aria-labelledby="criarSalaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="criarSalaModalLabel">Criar Nova Sala</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar modal"></button>
             </div>
-        </div>
-
-        <!-- Join Room Section -->
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Entrar por Código</h5>
-                </div>
-                <div class="card-body">
-                    <form id="formularioEntrarSala">
-                        <div class="mb-3">
-                            <label for="idSalaEntrar" class="form-label">Código da Sala</label>
-                            <input type="text" class="form-control" id="idSalaEntrar" placeholder="Digite o código da sala" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="nomeUsuarioEntrar" class="form-label">Seu Nome</label>
-                            <input type="text" class="form-control" id="nomeUsuarioEntrar" placeholder="Digite seu nome" required autocomplete="username">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="senhaEntrar" class="form-label">Senha (se necessário)</label>
-                            <input type="password" class="form-control" id="senhaEntrar" placeholder="Senha da sala" autocomplete="current-password">
-                        </div>
-                        
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="fas fa-sign-in-alt me-2"></i>Entrar na Sala
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Available Rooms -->
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Salas Disponíveis</h5>
-                    <button type="button" class="btn btn-sm btn-outline-light" onclick="carregarSalas()" title="Atualizar lista de salas">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-                <div class="card-body p-0">
-                    <div id="listaSalas" class="rooms-list-container">
-                        <div class="text-center p-3">
-                            <div class="loading"></div>
-                            <p class="mt-2 mb-0">Carregando salas...</p>
-                        </div>
+            <div class="modal-body">
+                <form id="formularioCriarSala">
+                    <div class="mb-3">
+                        <label for="nomeSala" class="form-label">Nome da Sala</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="nomeSala" 
+                               placeholder="Ex: Discussão Sistemas Distribuídos" 
+                               required 
+                               maxlength="50"
+                               title="Digite o nome da sala (máximo 50 caracteres)"
+                               aria-describedby="nomeSalaHelp">
+                        <div id="nomeSalaHelp" class="form-text">Máximo 50 caracteres</div>
                     </div>
-                </div>
+                    
+                    <div class="mb-3">
+                        <label for="nomeCriador" class="form-label">Seu Nome</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="nomeCriador" 
+                               placeholder="Seu nome de usuário" 
+                               required 
+                               maxlength="30" 
+                               autocomplete="username"
+                               title="Digite seu nome (máximo 30 caracteres)"
+                               aria-describedby="nomeCriadorHelp">
+                        <div id="nomeCriadorHelp" class="form-text">Máximo 30 caracteres</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="senhaSala" class="form-label">Senha (Opcional)</label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="senhaSala" 
+                               placeholder="Deixe vazio para sala pública" 
+                               autocomplete="new-password"
+                               title="Senha opcional para proteger a sala"
+                               aria-describedby="senhaSalaHelp">
+                        <div id="senhaSalaHelp" class="form-text">Definir senha torna a sala privada</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="criarSala()">
+                    <i class="fas fa-plus me-1" aria-hidden="true"></i>Criar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Join Room Modal -->
+<div class="modal fade" id="entrarSalaModal" tabindex="-1" aria-labelledby="entrarSalaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="entrarSalaModalLabel">Acessar por Código</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formularioEntrarSala">
+                    <div class="mb-3">
+                        <label for="idSalaEntrar" class="form-label">Código da Sala</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="idSalaEntrar" 
+                               placeholder="Código de 8 caracteres" 
+                               required
+                               title="Digite o código da sala fornecido pelo criador"
+                               aria-describedby="idSalaEntrarHelp">
+                        <div id="idSalaEntrarHelp" class="form-text">Código fornecido pelo criador</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="nomeUsuarioEntrar" class="form-label">Seu Nome</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="nomeUsuarioEntrar" 
+                               placeholder="Seu nome de usuário" 
+                               required 
+                               maxlength="30" 
+                               autocomplete="username"
+                               title="Digite seu nome para o chat">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="senhaEntrar" class="form-label">Senha</label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="senhaEntrar" 
+                               placeholder="Apenas para salas protegidas" 
+                               autocomplete="current-password"
+                               title="Senha da sala (apenas para salas protegidas)"
+                               aria-describedby="senhaEntrarHelp">
+                        <div id="senhaEntrarHelp" class="form-text">Necessário apenas para salas privadas</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="entrarNaSala()">
+                    <i class="fas fa-sign-in-alt me-1" aria-hidden="true"></i>Acessar
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Password Modal -->
-<div class="modal fade" id="modalSenha" tabindex="-1">
+<div class="modal fade" id="modalSenha" tabindex="-1" aria-labelledby="modalSenhaLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Sala Protegida por Senha</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" title="Fechar"></button>
+                <h5 class="modal-title" id="modalSenhaLabel">Sala Protegida</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar modal"></button>
             </div>
             <div class="modal-body">
-                <form>
-                    <p>Esta sala requer uma senha para acesso.</p>
-                    <div class="mb-3">
-                        <label for="nomeUsuarioModalHidden" class="form-label visually-hidden">Nome de usuário</label>
-                        <input type="text" class="form-control visually-hidden" id="nomeUsuarioModalHidden" autocomplete="username">
-                        <label for="senhaModal" class="form-label">Senha</label>
-                        <input type="password" class="form-control" id="senhaModal" placeholder="Digite a senha" autocomplete="current-password">
-                    </div>
-                    <input type="hidden" id="idSalaModal">
-                    <input type="hidden" id="nomeUsuarioModal">
-                </form>
+                <p>Esta sala requer senha para acesso.</p>
+                <div class="mb-3">
+                    <label for="senhaModal" class="form-label">Senha</label>
+                    <input type="password" 
+                           class="form-control" 
+                           id="senhaModal" 
+                           placeholder="Digite a senha" 
+                           autocomplete="current-password"
+                           title="Digite a senha da sala protegida">
+                </div>
+                <input type="hidden" id="idSalaModal">
+                <input type="hidden" id="nomeUsuarioModal">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="enviarSenha()">Entrar</button>
+                <button type="button" class="btn btn-primary" onclick="enviarSenha()">
+                    <i class="fas fa-unlock me-1" aria-hidden="true"></i>Entrar
+                </button>
             </div>
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block script %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% endblock %}

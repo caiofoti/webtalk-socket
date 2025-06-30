@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}WebTalk - Sala {{ room.name }}{% endblock %}
+{% block title %}WebTalk - {{ room.name }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -11,18 +11,21 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
                         <h4 class="mb-1 text-white">
-                            <i class="fas fa-comments me-2"></i>{{ room.name }}
+                            <i class="fas fa-comments me-2" aria-hidden="true"></i>{{ room.name }}
                         </h4>
                         <small class="text-white-50">
-                            <i class="fas fa-user me-1"></i>Criada por: {{ room.creator }}
+                            <i class="fas fa-user me-1" aria-hidden="true"></i>Criada por: {{ room.creator }}
                         </small>
                     </div>
                     <div>
                         <span class="badge bg-light text-dark me-2">
-                            <i class="fas fa-hashtag"></i> {{ room.id }}
+                            <i class="fas fa-hashtag" aria-hidden="true"></i> {{ room.id }}
                         </span>
-                        <button id="sairSala" class="btn btn-outline-light">
-                            <i class="fas fa-sign-out-alt me-1"></i>Sair
+                        <button id="sairSala" 
+                                class="btn btn-outline-light"
+                                title="Sair da sala de chat"
+                                aria-label="Sair da sala {{ room.name }}">
+                            <i class="fas fa-sign-out-alt me-1" aria-hidden="true"></i>SAIR
                         </button>
                     </div>
                 </div>
@@ -31,27 +34,42 @@
             <!-- Chat Container -->
             <div class="chat-container">
                 <!-- Messages Area -->
-                <div class="chat-messages" id="mensagensChat">
+                <div class="chat-messages" 
+                     id="mensagensChat" 
+                     role="log" 
+                     aria-live="polite" 
+                     aria-label="Mensagens do chat">
                     <div class="text-center text-muted p-4">
-                        <i class="fas fa-comments fa-3x mb-3 opacity-50"></i>
-                        <p>Início da conversa</p>
+                        <i class="fas fa-comments fa-3x mb-3 opacity-50" aria-hidden="true"></i>
+                        <p class="fw-bold">INÍCIO DA CONVERSA</p>
+                        <p>As mensagens aparecerão aqui conforme forem enviadas</p>
                     </div>
                 </div>
 
                 <!-- Input Area -->
                 <div class="chat-input-container">
                     <div class="input-group">
-                        <input type="text" id="entradaMensagem" class="form-control" placeholder="Digite sua mensagem..." maxlength="500">
-                        <button id="botaoEnviar" class="btn btn-primary" type="button" title="Enviar mensagem">
-                            <i class="fas fa-paper-plane"></i>
+                        <input type="text" 
+                               id="entradaMensagem" 
+                               class="form-control" 
+                               placeholder="Digite sua mensagem..." 
+                               maxlength="500"
+                               aria-label="Digite sua mensagem de chat"
+                               aria-describedby="botaoEnviar contadorCaracteres">
+                        <button id="botaoEnviar" 
+                                class="btn btn-primary" 
+                                type="button" 
+                                title="Enviar mensagem"
+                                aria-label="Enviar mensagem no chat">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
                         </button>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mt-2">
-                        <small class="text-muted">
-                            <i class="fas fa-user me-1"></i>Conectado como: <strong id="nomeUsuarioAtual"></strong>
+                        <small class="text-muted fw-bold">
+                            <i class="fas fa-user me-1" aria-hidden="true"></i>CONECTADO COMO: <strong id="nomeUsuarioAtual"></strong>
                         </small>
-                        <small class="text-muted">
-                            <span id="contadorCaracteres">0</span>/500
+                        <small class="text-muted fw-bold" aria-live="polite">
+                            <span id="contadorCaracteres">0</span>/500 CARACTERES
                         </small>
                     </div>
                 </div>

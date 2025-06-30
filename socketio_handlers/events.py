@@ -5,17 +5,22 @@ from datetime import datetime
 
 
 def registrar_eventos_socketio(socketio):
+    """Registra todos os manipuladores de eventos WebSocket"""
+
     @socketio.on('connect')
     def manipular_conexao():
-        print(f'Cliente conectado: {request.sid}')
+        """Manipula nova conexão WebSocket"""
+        print(f'[WEBSOCKET] Nova conexão estabelecida: SID={request.sid}')
         return True
 
     @socketio.on('disconnect')
     def manipular_desconexao():
-        print(f'Cliente desconectado: {request.sid}')
+        """Manipula desconexão WebSocket"""
+        print(f'[WEBSOCKET] Conexão encerrada: SID={request.sid}')
 
     @socketio.on('entrar')
     def manipular_entrada(dados):
+        """Processa entrada de usuário em sala de chat"""
         try:
             id_sala = dados.get('id_sala')
             nome_usuario = dados.get('nome_usuario')
@@ -39,18 +44,19 @@ def registrar_eventos_socketio(socketio):
 
             emit('usuario_entrou', {
                  'nome_usuario': nome_usuario}, room=id_sala)
-            print(f'Usuário {nome_usuario} entrou na sala {id_sala}')
+            print(f'[ROOM] Usuário "{nome_usuario}" entrou na sala {id_sala}')
 
             # Enviar mensagens históricas para o usuário que acabou de entrar
             for mensagem in sala.mensagens[-20:]:  # Últimas 20 mensagens
                 emit('mensagem_chat', mensagem)
 
         except Exception as e:
-            print(f"Erro ao entrar na sala: {e}")
+            print(f"[ERROR] Falha ao processar entrada na sala: {e}")
             emit('erro', {'mensagem': 'Erro interno do servidor'})
 
     @socketio.on('sair')
     def manipular_saida(dados):
+        """Processa saída de usuário de sala de chat"""
         try:
             id_sala = dados.get('id_sala')
             nome_usuario = dados.get('nome_usuario')
@@ -63,13 +69,15 @@ def registrar_eventos_socketio(socketio):
                 leave_room(id_sala)
                 emit('usuario_saiu', {
                      'nome_usuario': nome_usuario}, room=id_sala)
-                print(f'Usuário {nome_usuario} saiu da sala {id_sala}')
+                print(
+                    f'[ROOM] Usuário "{nome_usuario}" saiu da sala {id_sala}')
 
         except Exception as e:
-            print(f"Erro ao sair da sala: {e}")
+            print(f"[ERROR] Falha ao processar saída da sala: {e}")
 
     @socketio.on('mensagem_chat')
     def manipular_mensagem(dados):
+        """Processa e distribui mensagens de chat"""
         try:
             id_sala = dados.get('id_sala')
             nome_usuario = dados.get('nome_usuario')
@@ -110,5 +118,5 @@ def registrar_eventos_socketio(socketio):
             emit('mensagem_chat', dados_mensagem, room=id_sala)
 
         except Exception as e:
-            print(f"Erro ao enviar mensagem: {e}")
+            print(f"[ERROR] Falha ao processar mensagem: {e}")
             emit('erro', {'mensagem': 'Erro ao enviar mensagem'})

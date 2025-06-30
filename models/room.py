@@ -20,6 +20,7 @@ class Sala:
         self.ultima_atividade = time.time()
 
     def para_dicionario(self):
+        """Converte objeto Sala para dicionário serializável"""
         return {
             'id': self.id,
             'nome': self.nome,
@@ -32,15 +33,18 @@ class Sala:
         }
 
     def adicionar_usuario(self, nome_usuario):
+        """Adiciona usuário à sala e atualiza atividade"""
         self.usuarios.add(nome_usuario)
         self.atualizar_atividade()
 
     def remover_usuario(self, nome_usuario):
+        """Remove usuário da sala e atualiza atividade"""
         if nome_usuario in self.usuarios:
             self.usuarios.remove(nome_usuario)
         self.atualizar_atividade()
 
     def adicionar_mensagem(self, mensagem):
+        """Adiciona mensagem ao histórico da sala"""
         self.mensagens.append(mensagem)
         self.atualizar_atividade()
         if len(self.mensagens) > 100:  # Limitar a 100 mensagens mais recentes
@@ -50,6 +54,7 @@ class Sala:
         self.ultima_atividade = time.time()
 
     def esta_expirada(self, timeout_horas=24):
+        """Verifica se a sala expirou baseado no tempo de inatividade"""
         # Verifica se a sala está inativa por mais do tempo definido
         tempo_decorrido = time.time() - self.ultima_atividade
         return tempo_decorrido > (timeout_horas * 60 * 60) and not self.usuarios
@@ -64,11 +69,11 @@ class GerenciadorSalas:
         self.carregar_salas()
 
     def inicializar_bd(self):
+        """Inicializa estrutura do banco de dados SQLite"""
         try:
             conexao = sqlite3.connect(self.caminho_bd)
             cursor = conexao.cursor()
 
-            # Criar tabela de salas se não existir (versão nova com nomes em português)
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS salas (
                 id TEXT PRIMARY KEY,
@@ -80,7 +85,6 @@ class GerenciadorSalas:
             )
             ''')
 
-            # Criar tabela de mensagens se não existir (versão nova com nomes em português)
             cursor.execute('''
             CREATE TABLE IF NOT EXISTS mensagens (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,12 +98,13 @@ class GerenciadorSalas:
 
             conexao.commit()
             conexao.close()
-            print("Banco de dados inicializado com sucesso")
+            print("[DATABASE] Estrutura do banco de dados inicializada com sucesso")
 
         except Exception as e:
-            print(f"Erro ao inicializar banco de dados: {e}")
+            print(f"[ERROR] Falha ao inicializar banco de dados: {e}")
 
     def carregar_salas(self):
+        """Carrega salas existentes do banco de dados para memória"""
         try:
             conexao = sqlite3.connect(self.caminho_bd)
             conexao.row_factory = sqlite3.Row
@@ -133,13 +138,15 @@ class GerenciadorSalas:
                 self.salas[sala.id] = sala
 
             conexao.close()
-            print(f"Carregadas {len(self.salas)} salas do banco de dados")
+            print(
+                f"[DATABASE] Carregadas {len(self.salas)} salas do banco de dados")
 
         except Exception as e:
-            print(f"Erro ao carregar salas: {e}")
+            print(f"[ERROR] Falha ao carregar salas: {e}")
             self.salas = {}
 
     def criar_sala(self, nome, criador, senha=None):
+        """Cria nova sala e persiste no banco de dados"""
         with self._trava:
             try:
                 # Gerar ID único
@@ -162,11 +169,12 @@ class GerenciadorSalas:
                 conexao.close()
 
                 self.salas[id_sala] = sala
-                print(f"Sala criada: {id_sala} - {nome}")
+                print(
+                    f"[ROOM] Nova sala criada: ID={id_sala}, Nome='{nome}', Criador='{criador}'")
                 return sala
 
             except Exception as e:
-                print(f"Erro ao criar sala: {e}")
+                print(f"[ERROR] Falha ao criar sala: {e}")
                 raise
 
     def obter_sala(self, id_sala):
@@ -176,6 +184,7 @@ class GerenciadorSalas:
         return list(self.salas.values())
 
     def excluir_sala(self, id_sala):
+        """Remove sala permanentemente do sistema"""
         with self._trava:
             try:
                 if id_sala in self.salas:
@@ -191,15 +200,16 @@ class GerenciadorSalas:
                     conexao.close()
 
                     del self.salas[id_sala]
-                    print(f"Sala excluída: {id_sala}")
+                    print(f"[ROOM] Sala excluída: ID={id_sala}")
                     return True
                 return False
 
             except Exception as e:
-                print(f"Erro ao excluir sala: {e}")
+                print(f"[ERROR] Falha ao excluir sala {id_sala}: {e}")
                 return False
 
     def verificar_senha_sala(self, id_sala, senha):
+        """Valida senha de acesso à sala"""
         sala = self.obter_sala(id_sala)
         if not sala:
             return False
@@ -210,6 +220,7 @@ class GerenciadorSalas:
         return sala.senha == senha
 
     def adicionar_mensagem_na_sala(self, id_sala, nome_usuario, mensagem):
+        """Adiciona nova mensagem à sala e persiste no banco"""
         try:
             sala = self.obter_sala(id_sala)
             if not sala:
@@ -238,14 +249,15 @@ class GerenciadorSalas:
             return True
 
         except Exception as e:
-            print(f"Erro ao adicionar mensagem: {e}")
+            print(
+                f"[ERROR] Falha ao adicionar mensagem na sala {id_sala}: {e}")
             return False
 
     def obter_horario(self):
         return datetime.now().strftime('%H:%M:%S')
 
     def limpar_salas_expiradas(self, timeout_horas=24):
-        """Remove salas inativas que expiraram"""
+        """Marca salas inativas como expiradas"""
         try:
             ids_expirados = []
 
@@ -268,11 +280,11 @@ class GerenciadorSalas:
             return len(ids_expirados)
 
         except Exception as e:
-            print(f"Erro ao limpar salas expiradas: {e}")
+            print(f"[ERROR] Falha ao limpar salas expiradas: {e}")
             return 0
 
     def obter_estatisticas(self):
-        """Retorna estatísticas para o painel de admin"""
+        """Retorna estatísticas do sistema para dashboard administrativo"""
         try:
             salas_ativas = sum(
                 1 for sala in self.salas.values() if sala.esta_ativa)
@@ -287,7 +299,7 @@ class GerenciadorSalas:
             }
 
         except Exception as e:
-            print(f"Erro ao obter estatísticas: {e}")
+            print(f"[ERROR] Falha ao obter estatísticas: {e}")
             return {
                 'total_salas': 0,
                 'salas_ativas': 0,
@@ -296,7 +308,7 @@ class GerenciadorSalas:
             }
 
     def _obter_atividade_recente(self):
-        """Obtém atividade recente de todas as salas"""
+        """Recupera atividade recente do sistema para logs administrativos"""
         try:
             recente = []
 
@@ -322,7 +334,7 @@ class GerenciadorSalas:
             return recente
 
         except Exception as e:
-            print(f"Erro ao obter atividade recente: {e}")
+            print(f"[ERROR] Falha ao obter atividade recente: {e}")
             return []
 
 

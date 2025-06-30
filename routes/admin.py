@@ -7,17 +7,19 @@ admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/admin')
 def admin():
+    """Renderiza painel administrativo"""
     return render_template('admin.html')
 
 
 @admin_bp.route('/api/admin/estatisticas')
 def estatisticas_admin():
+    """API endpoint para estatísticas do sistema"""
     try:
         estatisticas = gerenciador_salas.obter_estatisticas()
         return jsonify(estatisticas)
 
     except Exception as e:
-        print(f"Erro ao obter estatísticas do admin: {e}")
+        print(f"[ADMIN ERROR] Falha ao obter estatísticas: {e}")
         return jsonify({
             'total_salas': 0,
             'salas_ativas': 0,
@@ -28,6 +30,7 @@ def estatisticas_admin():
 
 @admin_bp.route('/api/admin/salas/<id_sala>', methods=['DELETE'])
 def excluir_sala(id_sala):
+    """API endpoint para exclusão administrativa de sala"""
     try:
         sala = gerenciador_salas.obter_sala(id_sala)
         if not sala:
@@ -40,12 +43,13 @@ def excluir_sala(id_sala):
         return jsonify({'erro': 'Erro ao excluir sala'}), 500
 
     except Exception as e:
-        print(f"Erro ao excluir sala: {e}")
+        print(f"[ADMIN ERROR] Falha ao excluir sala {id_sala}: {e}")
         return jsonify({'erro': 'Erro interno do servidor'}), 500
 
 
 @admin_bp.route('/api/admin/configuracoes', methods=['POST'])
 def atualizar_configuracoes():
+    """API endpoint para atualização de configurações do sistema"""
     try:
         dados = request.json
         if not dados:
@@ -77,12 +81,13 @@ def atualizar_configuracoes():
         return jsonify({'mensagem': 'Configurações atualizadas com sucesso'})
 
     except Exception as e:
-        print(f"Erro ao atualizar configurações: {e}")
+        print(f"[ADMIN ERROR] Falha ao atualizar configurações: {e}")
         return jsonify({'erro': 'Erro interno do servidor'}), 500
 
 
 @admin_bp.route('/api/admin/limpeza', methods=['POST'])
 def limpar_salas():
+    """API endpoint para limpeza de salas expiradas"""
     try:
         contador_expiradas = gerenciador_salas.limpar_salas_expiradas()
         return jsonify({
@@ -91,15 +96,5 @@ def limpar_salas():
         })
 
     except Exception as e:
-        print(f"Erro ao limpar salas: {e}")
-        return jsonify({'erro': 'Erro interno do servidor'}), 500
-    try:
-        contador_expiradas = gerenciador_salas.limpar_salas_expiradas()
-        return jsonify({
-            'mensagem': f'{contador_expiradas} salas expiradas foram limpas',
-            'contador_limpas': contador_expiradas
-        })
-
-    except Exception as e:
-        print(f"Erro ao limpar salas: {e}")
+        print(f"[ADMIN ERROR] Falha ao limpar salas: {e}")
         return jsonify({'erro': 'Erro interno do servidor'}), 500
