@@ -2,27 +2,38 @@
 
 {% block title %}WebTalk - {{ room.name }}{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <!-- Chat Header -->
-            <div class="card chat-header mb-3">
-                <div class="card-body d-flex justify-content-between align-items-center">
+<div class="main-container">
+    <div class="content-wrapper">
+        <div class="main-content">
+            <!-- Chat Header - LAYOUT IGUAL AO INDEX -->
+            <div class="content-header">
+                <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h4 class="mb-1 text-white">
-                            <i class="fas fa-comments me-2" aria-hidden="true"></i>{{ room.name }}
-                        </h4>
-                        <small class="text-white-50">
-                            <i class="fas fa-user me-1" aria-hidden="true"></i>Criada por: {{ room.creator }}
-                        </small>
+                        <h1 class="content-title">
+                            <i class="fas fa-comments" aria-hidden="true"></i>
+                            {{ room.name }}
+                        </h1>
+                        <p class="chat-info">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            Criada por: <strong>{{ room.criador }}</strong>
+                            {% if room.senha %}
+                            <i class="fas fa-lock ms-2 text-warning" title="Sala protegida por senha"></i>
+                            {% else %}
+                            <i class="fas fa-globe ms-2 text-success" title="Sala pública"></i>
+                            {% endif %}
+                        </p>
                     </div>
-                    <div>
-                        <span class="badge bg-light text-dark me-2">
+                    <div class="chat-actions">
+                        <span class="badge bg-primary">
                             <i class="fas fa-hashtag" aria-hidden="true"></i> {{ room.id }}
                         </span>
                         <button id="sairSala" 
-                                class="btn btn-outline-light"
+                                class="btn-control small"
                                 title="Sair da sala de chat"
                                 aria-label="Sair da sala {{ room.name }}">
                             <i class="fas fa-sign-out-alt me-1" aria-hidden="true"></i>SAIR
@@ -31,46 +42,70 @@
                 </div>
             </div>
 
-            <!-- Chat Container -->
-            <div class="chat-container">
-                <!-- Messages Area -->
-                <div class="chat-messages" 
-                     id="mensagensChat" 
-                     role="log" 
-                     aria-live="polite" 
-                     aria-label="Mensagens do chat">
-                    <div class="text-center text-muted p-4">
-                        <i class="fas fa-comments fa-3x mb-3 opacity-50" aria-hidden="true"></i>
-                        <p class="fw-bold">INÍCIO DA CONVERSA</p>
-                        <p>As mensagens aparecerão aqui conforme forem enviadas</p>
+            <div class="content-body">
+                <!-- Chat Container -->
+                <div class="chat-section">
+                    <!-- Messages Area -->
+                    <div class="chat-messages-container">
+                        <div class="chat-messages" 
+                             id="mensagensChat" 
+                             role="log" 
+                             aria-live="polite" 
+                             aria-label="Mensagens do chat">
+                            <div class="text-center text-muted p-3">
+                                <i class="fas fa-comments fa-2x mb-2 opacity-50" aria-hidden="true"></i>
+                                <p class="fw-bold mb-1">INÍCIO DA CONVERSA</p>
+                                <p class="small mb-0">As mensagens aparecerão aqui conforme forem enviadas</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Input Area -->
-                <div class="chat-input-container">
-                    <div class="input-group">
-                        <input type="text" 
-                               id="entradaMensagem" 
-                               class="form-control" 
-                               placeholder="Digite sua mensagem..." 
-                               maxlength="500"
-                               aria-label="Digite sua mensagem de chat"
-                               aria-describedby="botaoEnviar contadorCaracteres">
-                        <button id="botaoEnviar" 
-                                class="btn btn-primary" 
-                                type="button" 
-                                title="Enviar mensagem"
-                                aria-label="Enviar mensagem no chat">
-                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-2">
-                        <small class="text-muted fw-bold">
-                            <i class="fas fa-user me-1" aria-hidden="true"></i>CONECTADO COMO: <strong id="nomeUsuarioAtual"></strong>
-                        </small>
-                        <small class="text-muted fw-bold" aria-live="polite">
-                            <span id="contadorCaracteres">0</span>/500 CARACTERES
-                        </small>
+                    <!-- Input Area -->
+                    <div class="chat-input-section">
+                        <div class="input-group">
+                            <input type="text" 
+                                   id="entradaMensagem" 
+                                   class="form-control" 
+                                   placeholder="Digite sua mensagem..." 
+                                   maxlength="500"
+                                   aria-label="Digite sua mensagem de chat"
+                                   aria-describedby="botaoEnviar contadorCaracteres">
+                            <button id="botaoArquivo" 
+                                    class="btn btn-outline-primary" 
+                                    type="button" 
+                                    title="Enviar arquivo"
+                                    aria-label="Enviar arquivo">
+                                <i class="fas fa-paperclip" aria-hidden="true"></i>
+                            </button>
+                            <button id="botaoEnviar" 
+                                    class="btn btn-primary" 
+                                    type="button" 
+                                    title="Enviar mensagem"
+                                    aria-label="Enviar mensagem no chat">
+                                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Input de arquivo oculto -->
+                        <input type="file" 
+                               id="inputArquivo" 
+                               accept=".pdf,.jpg,.jpeg,.png" 
+                               style="display: none;"
+                               aria-label="Selecionar arquivo para envio">
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <small class="text-muted fw-bold">
+                                <i class="fas fa-user me-1" aria-hidden="true"></i>CONECTADO COMO: <strong id="nomeUsuarioAtual"></strong>
+                            </small>
+                            <small class="text-muted fw-bold" aria-live="polite">
+                                <span id="contadorCaracteres">0</span>/500 CARACTERES
+                            </small>
+                        </div>
+                        
+                        <!-- Progress bar para upload -->
+                        <div id="progressoUpload" class="progress mt-2" style="display: none;">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -131,8 +166,28 @@ function inicializarChat() {
         adicionarMensagem(dados);
     });
     
+    socket.on('arquivo_compartilhado', function(dados) {
+        adicionarMensagemArquivo(dados);
+    });
+    
+    // LISTENER CORRIGIDO PARA SOFT DELETE
+    socket.on('mensagem_removida', function(dados) {
+        console.log('[DELETE] Recebido evento de remoção:', dados);
+        implementarSoftDelete(dados.id_mensagem);
+    });
+    
     // Eventos da interface
     document.getElementById('botaoEnviar').addEventListener('click', enviarMensagem);
+    document.getElementById('botaoArquivo').addEventListener('click', function() {
+        document.getElementById('inputArquivo').click();
+    });
+    
+    document.getElementById('inputArquivo').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            enviarArquivo(e.target.files[0]);
+        }
+    });
+    
     document.getElementById('entradaMensagem').addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -179,30 +234,513 @@ function enviarMensagem() {
     }
 }
 
+function enviarArquivo(arquivo) {
+    const tamanhoMaximo = 16 * 1024 * 1024; // 16MB
+    const tiposPermitidos = ['pdf', 'jpg', 'jpeg', 'png'];
+    
+    // Validações mais rigorosas
+    if (arquivo.size > tamanhoMaximo) {
+        mostrarAlerta('Arquivo muito grande! Máximo permitido: 16MB', 'warning');
+        return;
+    }
+    
+    if (arquivo.size === 0) {
+        mostrarAlerta('Arquivo está vazio!', 'warning');
+        return;
+    }
+    
+    const extensao = arquivo.name.split('.').pop().toLowerCase();
+    if (!tiposPermitidos.includes(extensao)) {
+        mostrarAlerta('Tipo de arquivo não permitido! Use: PDF, JPG, JPEG, PNG', 'warning');
+        return;
+    }
+    
+    // Validação adicional do nome do arquivo
+    if (arquivo.name.length > 255) {
+        mostrarAlerta('Nome do arquivo muito longo!', 'warning');
+        return;
+    }
+    
+    // Verificar caracteres especiais no nome
+    const nomeValido = /^[a-zA-Z0-9._\-\s()[\]]+$/;
+    if (!nomeValido.test(arquivo.name)) {
+        mostrarAlerta('Nome do arquivo contém caracteres inválidos!', 'warning');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+    formData.append('nome_usuario', nomeUsuario);
+    
+    // Mostrar progress bar
+    const progressContainer = document.getElementById('progressoUpload');
+    const progressBar = progressContainer.querySelector('.progress-bar');
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+    
+    // Desabilitar botão durante upload
+    const botaoArquivo = document.getElementById('botaoArquivo');
+    const botaoEnviar = document.getElementById('botaoEnviar');
+    const inputArquivo = document.getElementById('inputArquivo');
+    
+    botaoArquivo.disabled = true;
+    botaoEnviar.disabled = true;
+    inputArquivo.disabled = true;
+    
+    botaoArquivo.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    botaoArquivo.classList.add('uploading');
+    
+    // Simular progresso
+    let progresso = 0;
+    const intervalProgresso = setInterval(() => {
+        progresso += Math.random() * 30;
+        if (progresso > 90) progresso = 90;
+        progressBar.style.width = progresso + '%';
+    }, 200);
+    
+    fetch(`/api/salas/${idSala}/upload`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        // Completar barra de progresso
+        clearInterval(intervalProgresso);
+        progressBar.style.width = '100%';
+        
+        return response.json();
+    })
+    .then(dados => {
+        if (dados.erro) {
+            mostrarAlerta(dados.erro, 'danger');
+            
+            // Adicionar classe de erro visual
+            botaoArquivo.classList.add('upload-error');
+            setTimeout(() => {
+                botaoArquivo.classList.remove('upload-error');
+            }, 2000);
+        } else {
+            // Notificar outros usuários via WebSocket
+            socket.emit('arquivo_compartilhado', {
+                id_sala: idSala,
+                nome_usuario: nomeUsuario,
+                nome_arquivo: dados.nome_arquivo,
+                tipo_arquivo: dados.tipo_arquivo,
+                id: dados.id_mensagem
+            });
+            
+            mostrarAlerta(`Arquivo enviado com sucesso! (${formatarTamanho(dados.tamanho || arquivo.size)})`, 'success');
+            
+            // Adicionar classe de sucesso visual
+            botaoArquivo.classList.add('upload-success');
+            setTimeout(() => {
+                botaoArquivo.classList.remove('upload-success');
+            }, 2000);
+        }
+    })
+    .catch(erro => {
+        console.error('Erro no upload:', erro);
+        mostrarAlerta('Erro de conexão ao enviar arquivo', 'danger');
+        
+        botaoArquivo.classList.add('upload-error');
+        setTimeout(() => {
+            botaoArquivo.classList.remove('upload-error');
+        }, 2000);
+    })
+    .finally(() => {
+        // Limpar e reabilitar controles
+        clearInterval(intervalProgresso);
+        
+        setTimeout(() => {
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+            
+            botaoArquivo.disabled = false;
+            botaoEnviar.disabled = false;
+            inputArquivo.disabled = false;
+            
+            botaoArquivo.innerHTML = '<i class="fas fa-paperclip"></i>';
+            botaoArquivo.classList.remove('uploading');
+            
+            inputArquivo.value = '';
+        }, 1000);
+    });
+}
+
+function formatarTamanho(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 function adicionarMensagem(dados) {
     const containerMensagens = document.getElementById('mensagensChat');
     const divMensagem = document.createElement('div');
     const ehPropria = dados.nome_usuario === nomeUsuario;
     
+    // Limpar o placeholder se existir
+    const placeholder = containerMensagens.querySelector('.text-center.text-muted');
+    if (placeholder) {
+        placeholder.remove();
+    }
+    
     divMensagem.className = `message ${ehPropria ? 'message-own' : 'message-other'}`;
+    divMensagem.setAttribute('data-message-id', dados.id);
     
-    const horarioMensagem = new Date().toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    divMensagem.innerHTML = `
-        <div class="message-header">
-            ${!ehPropria ? `<strong>${dados.nome_usuario}</strong> • ` : ''}${dados.horario || horarioMensagem}
-        </div>
-        <div class="message-bubble">
-            ${escaparHtml(dados.mensagem)}
-        </div>
-    `;
+    // VERIFICAR SE É MENSAGEM DELETADA
+    if (dados.deletada || dados.tipo === 'texto_deletado') {
+        divMensagem.classList.add('message-deleted');
+        
+        const horarioMensagem = new Date().toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        divMensagem.innerHTML = `
+            <div class="message-header">
+                <div class="message-header-info">
+                    ${!ehPropria ? `<strong>${escaparHtml(dados.nome_usuario)}</strong> • ` : ''}${dados.horario || horarioMensagem}
+                </div>
+            </div>
+            <div class="message-bubble">
+                <div class="deleted-content">
+                    <i class="fas fa-comment-slash"></i>
+                    <span>Mensagem deletada</span>
+                </div>
+            </div>
+        `;
+    } else {
+        // Mensagem normal
+        const horarioMensagem = new Date().toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        divMensagem.innerHTML = `
+            <div class="message-header">
+                <div class="message-header-info">
+                    ${!ehPropria ? `<strong>${escaparHtml(dados.nome_usuario)}</strong> • ` : ''}${dados.horario || horarioMensagem}
+                </div>
+                ${ehPropria ? `
+                    <div class="message-header-actions">
+                        <button class="btn-delete-message" onclick="deletarMensagem('${dados.id}')" title="Deletar mensagem">
+                            <i class="fas fa-trash"></i>
+                            <span>×</span>
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+            <div class="message-bubble">
+                ${escaparHtml(dados.mensagem)}
+            </div>
+        `;
+    }
     
     containerMensagens.appendChild(divMensagem);
     containerMensagens.scrollTop = containerMensagens.scrollHeight;
 }
+
+function adicionarMensagemArquivo(dados) {
+    const containerMensagens = document.getElementById('mensagensChat');
+    const divMensagem = document.createElement('div');
+    const ehPropria = dados.nome_usuario === nomeUsuario;
+    
+    divMensagem.className = `message ${ehPropria ? 'message-own' : 'message-other'}`;
+    divMensagem.setAttribute('data-message-id', dados.id || Date.now());
+    
+    // Limpar o placeholder se existir
+    const placeholder = containerMensagens.querySelector('.text-center.text-muted');
+    if (placeholder) {
+        placeholder.remove();
+    }
+    
+    // VERIFICAR SE É ARQUIVO DELETADO
+    if (dados.deletada || dados.tipo === 'arquivo_deletado' || dados.nome_arquivo === 'Arquivo deletado') {
+        divMensagem.classList.add('message-deleted');
+        
+        divMensagem.innerHTML = `
+            <div class="message-header">
+                <div class="message-header-info">
+                    ${!ehPropria ? `<strong>${escaparHtml(dados.nome_usuario)}</strong> • ` : ''}${dados.horario || new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
+                </div>
+            </div>
+            <div class="message-bubble">
+                <div class="deleted-content">
+                    <i class="fas fa-file-slash"></i>
+                    <span>Arquivo deletado</span>
+                </div>
+            </div>
+        `;
+    } else {
+        // Arquivo normal
+        const iconeArquivo = obterIconeArquivo(dados.tipo_arquivo);
+        
+        // Verificar se é imagem para preview
+        const ehImagem = ['jpg', 'jpeg', 'png'].includes(dados.tipo_arquivo.toLowerCase());
+        
+        divMensagem.innerHTML = `
+            <div class="message-header">
+                <div class="message-header-info">
+                    ${!ehPropria ? `<strong>${escaparHtml(dados.nome_usuario)}</strong> • ` : ''}${dados.horario || new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
+                </div>
+                ${ehPropria ? `
+                    <div class="message-header-actions">
+                        <button class="btn-delete-message" onclick="deletarMensagem('${dados.id || Date.now()}')" title="Deletar arquivo">
+                            <i class="fas fa-trash"></i>
+                            <span>×</span>
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+            <div class="message-bubble file-message">
+                <div class="file-info">
+                    <i class="fas fa-${iconeArquivo} me-2" style="font-size: 1rem; color: var(--chat-primary);"></i>
+                    <div>
+                        <div class="file-name">${escaparHtml(dados.nome_arquivo)}</div>
+                        <small class="file-type">${dados.tipo_arquivo.toUpperCase()}</small>
+                    </div>
+                </div>
+                ${ehImagem ? `
+                    <div class="image-preview">
+                        <img src="/api/salas/${idSala}/download/${encodeURIComponent(dados.nome_arquivo)}" 
+                             class="preview-thumbnail" 
+                             alt="${escaparHtml(dados.nome_arquivo)}"
+                             onclick="visualizarImagem('${escaparHtml(dados.nome_arquivo)}')"
+                             onerror="this.parentElement.innerHTML='<div class=\\'text-muted small\\'><i class=\\'fas fa-exclamation-triangle\\'></i> Erro ao carregar</div>'"
+                             loading="lazy">
+                    </div>
+                ` : ''}
+                <div class="file-actions">
+                    <a href="/api/salas/${idSala}/download/${encodeURIComponent(dados.nome_arquivo)}?download=true" 
+                       target="_blank" 
+                       class="btn btn-sm btn-outline-primary"
+                       title="Baixar arquivo">
+                        <i class="fas fa-download me-1"></i>Baixar
+                    </a>
+                    ${ehImagem ? 
+                        `<button class="btn btn-sm btn-outline-secondary" onclick="visualizarImagem('${escaparHtml(dados.nome_arquivo)}')" title="Visualizar imagem">
+                            <i class="fas fa-eye me-1"></i>Ver
+                        </button>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    containerMensagens.appendChild(divMensagem);
+    containerMensagens.scrollTop = containerMensagens.scrollHeight;
+}
+
+function visualizarImagem(nomeArquivo) {
+    // Verificar se já existe um modal aberto e fechá-lo
+    const modalExistente = document.getElementById('imageModal');
+    if (modalExistente) {
+        modalExistente.remove();
+    }
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'imageModal';
+    modal.setAttribute('tabindex', '-1');
+    modal.setAttribute('aria-hidden', 'true');
+    
+    const urlImagem = `/api/salas/${idSala}/download/${encodeURIComponent(nomeArquivo)}`;
+    const urlDownload = `/api/salas/${idSala}/download/${encodeURIComponent(nomeArquivo)}?download=true`;
+    
+    modal.innerHTML = `
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-image me-2"></i>
+                        ${escaparHtml(nomeArquivo)}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="image-container text-center d-flex align-items-center justify-content-center">
+                        <div class="loading-spinner" id="imageLoadingSpinner">
+                            <div class="spinner-border text-light" role="status">
+                                <span class="visually-hidden">Carregando imagem...</span>
+                            </div>
+                            <p class="mt-2 text-light">Carregando imagem...</p>
+                        </div>
+                        <img id="modalImage" 
+                             src="${urlImagem}" 
+                             class="img-fluid" 
+                             alt="${escaparHtml(nomeArquivo)}"
+                             style="max-height: 80vh; max-width: 100%; display: none;"
+                             onload="imagemCarregada()"
+                             onerror="erroAoCarregarImagem()">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Fechar
+                    </button>
+                    <a href="${urlDownload}" 
+                       target="_blank" 
+                       class="btn btn-primary">
+                        <i class="fas fa-download me-1"></i>Baixar Original
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Criar e mostrar modal
+    const bootstrapModal = new bootstrap.Modal(modal, {
+        backdrop: true,
+        keyboard: true,
+        focus: true
+    });
+    
+    bootstrapModal.show();
+    
+    // Remover modal do DOM quando fechado
+    modal.addEventListener('hidden.bs.modal', () => {
+        modal.remove();
+    });
+    
+    console.log(`[IMAGE] Tentando carregar imagem: ${urlImagem}`);
+}
+
+// Funções auxiliares para o modal de imagem
+window.imagemCarregada = function() {
+    const spinner = document.getElementById('imageLoadingSpinner');
+    const imagem = document.getElementById('modalImage');
+    
+    if (spinner) spinner.style.display = 'none';
+    if (imagem) imagem.style.display = 'block';
+    
+    console.log('[IMAGE] Imagem carregada com sucesso');
+};
+
+window.erroAoCarregarImagem = function() {
+    const spinner = document.getElementById('imageLoadingSpinner');
+    const container = document.querySelector('.image-container');
+    
+    if (spinner) spinner.style.display = 'none';
+    if (container) {
+        container.innerHTML = `
+            <div class="text-center p-4 text-light">
+                <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                <h5 class="text-danger">Erro ao carregar imagem</h5>
+                <p class="text-light">A imagem pode estar corrompida ou não estar mais disponível.</p>
+            </div>
+        `;
+    }
+    
+    console.error('[IMAGE] Erro ao carregar imagem');
+};
+
+function deletarMensagem(idMensagem) {
+    if (!idMensagem) {
+        mostrarAlerta('ID da mensagem não encontrado', 'warning');
+        return;
+    }
+    
+    console.log('[DELETE] Tentando deletar mensagem:', idMensagem);
+    
+    if (!confirm('Deletar esta mensagem/arquivo?')) {
+        return;
+    }
+    
+    // Desabilitar o botão temporariamente para evitar cliques duplos
+    const mensagemElemento = document.querySelector(`[data-message-id="${idMensagem}"]`);
+    const botaoDelete = mensagemElemento ? mensagemElemento.querySelector('.btn-delete-message') : null;
+    
+    if (botaoDelete) {
+        botaoDelete.disabled = true;
+        botaoDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        console.log('[DELETE] Botão desabilitado para:', idMensagem);
+    }
+    
+    // Enviar comando de deleção via WebSocket
+    socket.emit('deletar_mensagem', {
+        id_sala: idSala,
+        id_mensagem: idMensagem,
+        nome_usuario: nomeUsuario
+    });
+    
+    console.log('[DELETE] Comando enviado via WebSocket para:', idMensagem);
+    
+    // Timeout de segurança para reabilitar o botão se não houver resposta
+    setTimeout(() => {
+        if (botaoDelete && !mensagemElemento.classList.contains('message-deleted')) {
+            botaoDelete.disabled = false;
+            botaoDelete.innerHTML = '<i class="fas fa-trash"></i> <span>×</span>';
+            console.log('[DELETE] Timeout - botão reabilitado para:', idMensagem);
+        }
+    }, 5000);
+}
+
+function implementarSoftDelete(idMensagem) {
+    console.log('[SOFT DELETE] Implementando soft delete para:', idMensagem);
+    
+    const mensagemElemento = document.querySelector(`[data-message-id="${idMensagem}"]`);
+    if (!mensagemElemento) {
+        console.error('[SOFT DELETE] Elemento não encontrado para:', idMensagem);
+        return;
+    }
+    
+    // Marcar como deletada
+    mensagemElemento.classList.add('message-deleted');
+    
+    // Remover TODOS os botões de delete
+    const botoesDelete = mensagemElemento.querySelectorAll('.btn-delete-message');
+    botoesDelete.forEach(botao => {
+        botao.remove();
+        console.log('[SOFT DELETE] Botão de delete removido');
+    });
+    
+    // Remover actions container se estiver vazio
+    const actionsContainer = mensagemElemento.querySelector('.message-header-actions');
+    if (actionsContainer && actionsContainer.children.length === 0) {
+        actionsContainer.remove();
+    }
+    
+    // Substituir conteúdo da mensagem
+    const messageBubble = mensagemElemento.querySelector('.message-bubble');
+    if (messageBubble) {
+        const ehArquivo = messageBubble.classList.contains('file-message');
+        
+        if (ehArquivo) {
+            messageBubble.innerHTML = `
+                <div class="deleted-content">
+                    <i class="fas fa-file-slash"></i>
+                    <span>Arquivo deletado</span>
+                </div>
+            `;
+            console.log('[SOFT DELETE] Arquivo substituído por "Arquivo deletado"');
+        } else {
+            messageBubble.innerHTML = `
+                <div class="deleted-content">
+                    <i class="fas fa-comment-slash"></i>
+                    <span>Mensagem deletada</span>
+                </div>
+            `;
+            console.log('[SOFT DELETE] Mensagem substituída por "Mensagem deletada"');
+        }
+        
+        // Remover classes específicas de arquivo
+        messageBubble.classList.remove('file-message');
+    }
+    
+    // Animação sutil para indicar a mudança
+    mensagemElemento.style.animation = 'fadeInDeleted 0.5s ease';
+    setTimeout(() => {
+        mensagemElemento.style.animation = '';
+    }, 500);
+    
+    console.log('[SOFT DELETE] Soft delete implementado com sucesso para:', idMensagem);
+}
+
+// REMOVER O LISTENER DUPLICADO (estava causando conflito)
+// Este código foi removido para evitar duplicação:
+// socket.on('mensagem_removida', function(dados) { ... });
 
 function adicionarMensagemSistema(texto) {
     const containerMensagens = document.getElementById('mensagensChat');
@@ -223,6 +761,50 @@ function escaparHtml(texto) {
     const div = document.createElement('div');
     div.textContent = texto;
     return div.innerHTML;
+}
+
+function mostrarAlerta(mensagem, tipo) {
+    const alertasExistentes = document.querySelectorAll('.alerta-upload');
+    alertasExistentes.forEach(alerta => alerta.remove());
+    
+    const divAlerta = document.createElement('div');
+    divAlerta.className = `alert alert-${tipo} alert-dismissible fade show alerta-upload position-fixed`;
+    divAlerta.style.cssText = 'top: 80px; right: 20px; z-index: 9999; min-width: 300px; max-width: 400px;';
+    divAlerta.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${obterIconeAlerta(tipo)} me-2"></i>
+            <div>${mensagem}</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(divAlerta);
+    
+    setTimeout(() => {
+        if (divAlerta.parentNode) {
+            divAlerta.remove();
+        }
+    }, 5000);
+}
+
+function obterIconeArquivo(tipo) {
+    const icones = {
+        'pdf': 'file-pdf',
+        'jpg': 'file-image',
+        'jpeg': 'file-image',
+        'png': 'file-image'
+    };
+    return icones[tipo] || 'file';
+}
+
+function obterIconeAlerta(tipo) {
+    const icones = {
+        'success': 'check-circle',
+        'danger': 'exclamation-triangle',
+        'warning': 'exclamation-circle',
+        'info': 'info-circle'
+    };
+    return icones[tipo] || 'info-circle';
 }
 
 // Foco automático na entrada de mensagem

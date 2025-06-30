@@ -1,0 +1,330 @@
+/* Admin Page Specific Styles - TIGHT LAYOUT */
+:root {
+    --admin-primary: #0B354F;
+    --admin-secondary: #7093AC;
+    --admin-light: #D1D9DA;
+    --admin-white: #ffffff;
+    --admin-bg: #f8f9fa;
+    --admin-dark: #2c3e50;
+    --admin-border: 1px solid var(--admin-light);
+    --admin-radius: 8px;
+    --admin-shadow: 0 2px 12px rgba(11, 53, 79, 0.08);
+    --admin-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --admin-sidebar-bg: #1a252f;
+}
+
+/* Container específico para admin - TIGHT */
+.container-fluid {
+    padding: 0.3rem !important;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+}
+
+.row {
+    margin: 0 !important;
+    height: 100%;
+}
+
+/* Sidebar Ultra Compacta */
+.col-md-3.col-lg-2 {
+    padding: 0 !important;
+}
+
+.admin-sidebar {
+    background: var(--admin-sidebar-bg);
+    height: 100%;
+    padding: 1rem;
+    border-radius: var(--admin-radius);
+    margin-right: 0.3rem;
+}
+
+.admin-sidebar h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--admin-white);
+    font-weight: 600;
+}
+
+.admin-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-nav li {
+    margin-bottom: 0.3rem;
+}
+
+.admin-nav-link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    border-radius: var(--admin-radius);
+    font-size: 0.85rem;
+    transition: var(--admin-transition);
+}
+
+.admin-nav-link:hover,
+.admin-nav-link.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--admin-white);
+    text-decoration: none;
+}
+
+/* Main content area - TIGHT */
+.col-md-9.col-lg-10 {
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.admin-section {
+    background: var(--admin-white);
+    border-radius: var(--admin-radius);
+    padding: 1rem;
+    height: 100%;
+    overflow-y: auto;
+    box-shadow: var(--admin-shadow);
+}
+
+.admin-section h2 {
+    font-size: 1.3rem;
+    color: var(--admin-primary);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* Stats cards TIGHT */
+.stat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card {
+    background: var(--admin-white);
+    border: var(--admin-border);
+    border-radius: var(--admin-radius);
+    padding: 1rem;
+    text-align: center;
+    box-shadow: var(--admin-shadow);
+    transition: var(--admin-transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(11, 53, 79, 0.12);
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--admin-primary);
+    margin-bottom: 0.3rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--admin-secondary);
+    font-weight: 500;
+}
+
+/* Cards TIGHT */
+.card {
+    border: var(--admin-border);
+    border-radius: var(--admin-radius);
+    box-shadow: var(--admin-shadow);
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    background: var(--admin-bg);
+    border-bottom: var(--admin-border);
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+/* Tables TIGHT */
+.table {
+    font-size: 0.8rem;
+    margin-bottom: 0;
+}
+
+.table th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--admin-primary);
+    border-bottom: 2px solid var(--admin-light);
+    padding: 0.5rem;
+}
+
+.table td {
+    padding: 0.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(209, 217, 218, 0.3);
+}
+
+.table tbody tr:hover {
+    background-color: var(--admin-bg);
+}
+
+/* Buttons TIGHT */
+.btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: var(--admin-radius);
+    transition: var(--admin-transition);
+    font-weight: 500;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+.btn-primary {
+    background: var(--admin-primary);
+    border-color: var(--admin-primary);
+}
+
+.btn-primary:hover {
+    background: var(--admin-secondary);
+    border-color: var(--admin-secondary);
+    transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+    border-color: var(--admin-primary);
+    color: var(--admin-primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--admin-primary);
+    border-color: var(--admin-primary);
+}
+
+.btn-group .btn {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+}
+
+/* Forms TIGHT */
+.form-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--admin-primary);
+    margin-bottom: 0.3rem;
+}
+
+.form-control {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    border: var(--admin-border);
+    border-radius: var(--admin-radius);
+    transition: var(--admin-transition);
+}
+
+.form-control:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 2px rgba(11, 53, 79, 0.1);
+}
+
+/* Loading spinner */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--admin-light);
+    border-top-color: var(--admin-primary);
+    animation: spin 1s ease-in-out infinite;
+    border-radius: 50%;
+}
+
+/* Badges */
+.badge {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: calc(var(--admin-radius) / 2);
+}
+
+/* Alert customizado */
+.alert {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border-radius: var(--admin-radius);
+    font-size: 0.85rem;
+}
+
+/* Responsive para admin */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 0.2rem !important;
+    }
+    
+    .admin-sidebar {
+        margin-bottom: 0.3rem;
+        margin-right: 0;
+        padding: 0.75rem;
+    }
+    
+    .admin-sidebar h4 {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .admin-section {
+        padding: 0.75rem;
+    }
+    
+    .admin-section h2 {
+        font-size: 1.2rem;
+    }
+    
+    .stat-cards {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.5rem;
+    }
+    
+    .stat-card {
+        padding: 0.75rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .table {
+        font-size: 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Scrollbar customizada para admin */
+.admin-section::-webkit-scrollbar {
+    width: 5px;
+}
+
+.admin-section::-webkit-scrollbar-track {
+    background: var(--admin-bg);
+}
+
+.admin-section::-webkit-scrollbar-thumb {
+    background: var(--admin-light);
+    border-radius: var(--admin-radius);
+}
+
+.admin-section::-webkit-scrollbar-thumb:hover {
+    background: var(--admin-secondary);
+}

@@ -47,39 +47,110 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Info Modal - Simplified -->
+    <!-- Info Modal - Compact and Professional -->
     <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="infoModalLabel">Sobre o Projeto</h5>
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="height: 70vh; display: flex; flex-direction: column;">
+                <div class="modal-header flex-shrink-0">
+                    <h5 class="modal-title" id="infoModalLabel">
+                        <i class="fas fa-info-circle me-2"></i>WebTalk Socket
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                <div class="modal-body">
-                    <p>
-                        O <strong>WebTalk Socket</strong> é uma aplicação de comunicação em tempo real desenvolvida como 
-                        <strong>trabalho prático</strong> da disciplina de <strong>Fundamentos de Redes e Sistemas Distribuídos</strong> 
-                        do curso de <strong>Bacharelado em Informática Biomédica</strong> da <strong>UFCSPA</strong> 
-                        (Universidade Federal de Ciências da Saúde de Porto Alegre).
+                <div class="modal-body flex-grow-1 overflow-auto" style="padding: 1.5rem;">
+                    
+                    <div class="project-info mb-3">
+                        <h6><i class="fas fa-graduation-cap me-2"></i>Projeto Acadêmico</h6>
+                        <p class="mb-2">
+                            Sistema de <strong>comunicação distribuída</strong> desenvolvido para a disciplina 
+                            <strong>Fundamentos de Redes e Sistemas Distribuídos</strong> - 
+                            <strong>UFCSPA</strong> Informática Biomédica.
+                        </p>
+                        <p class="mb-1"><strong>Professor:</strong> João Carlos Gluz</p>
+                        <p class="mb-0"><strong>Equipe:</strong></p>
+                        <div class="ms-3">
+                            <a href="https://www.linkedin.com/in/bruno-costa-e-silva-giuliani-lopes-955828282/" 
+                               target="_blank" rel="noopener" class="text-decoration-none d-block mb-1">
+                                <i class="fab fa-linkedin me-1"></i>Bruno Costa E Silva Giuliani Lopes
+                            </a>
+                            <a href="https://www.linkedin.com/in/caiofoti/" 
+                               target="_blank" rel="noopener" class="text-decoration-none d-block mb-1">
+                                <i class="fab fa-linkedin me-1"></i>Caio Foti Pontes
+                            </a>
+                            <a href="https://www.linkedin.com/in/taina-selayaran/" 
+                               target="_blank" rel="noopener" class="text-decoration-none d-block">
+                                <i class="fab fa-linkedin me-1"></i>Tainá Machado Selayaran
+                            </a>
+                        </div>
+                    </div>
+
+                    <h6><i class="fas fa-cogs me-2"></i>Arquitetura</h6>
+                    <p class="mb-3">
+                        <strong>Cliente-servidor distribuído</strong> implementando comunicação em tempo real 
+                        via <strong>WebSocket</strong> e APIs <strong>REST</strong> para demonstrar conceitos 
+                        de redes e sistemas distribuídos.
                     </p>
-                    <p>
-                        O sistema implementa uma <strong>arquitetura cliente-servidor</strong> baseada em 
-                        <strong>web services REST/RESTful</strong>, demonstrando conceitos fundamentais de 
-                        <strong>sistemas distribuídos</strong> e <strong>comunicação em rede</strong>. 
-                        Permite a criação de <strong>salas de chat</strong> com suporte a <strong>mensagens de texto</strong> 
-                        e futuramente <strong>troca de documentos</strong> nos formatos JPEG, JPG, PNG e PDF.
-                    </p>
-                    <p>
-                        <strong>Tecnologias utilizadas:</strong> Backend desenvolvido em <strong>Python</strong> 
-                        com <strong>Flask</strong> para APIs REST e <strong>Socket.IO</strong> para comunicação 
-                        em tempo real. Frontend implementado com <strong>HTML5</strong>, <strong>CSS3</strong>, 
-                        <strong>Bootstrap 5</strong> e <strong>JavaScript ES6+</strong> com conectividade 
-                        <strong>WebSocket</strong> para interação bidirecional.
-                    </p>
-                    <p>
-                        <strong>Equipe:</strong> Bruno Costa E Silva Giuliani Lopes, Caio Foti Pontes e 
-                        Tainá Machado Selayaran. <strong>Orientação:</strong> Prof. João Gluz.
-                    </p>
+
+                    <h6><i class="fas fa-laptop-code me-2"></i>Funcionalidades</h6>
+                    <ul class="mb-3">
+                        <li>Chat em tempo real com múltiplos usuários</li>
+                        <li>Salas públicas e protegidas por senha</li>
+                        <li>Compartilhamento de arquivos (PDF, imagens)</li>
+                        <li>Visualização inline de imagens</li>
+                        <li>Sistema de soft delete para mensagens</li>
+                        <li>Painel administrativo de monitoramento</li>
+                    </ul>
+
+                    <h6><i class="fas fa-tools me-2"></i>Tecnologias</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Backend:</strong></p>
+                            <ul class="small">
+                                <li>Python 3.8+ com Flask</li>
+                                <li>Flask-SocketIO para WebSocket</li>
+                                <li>SQLite para persistência</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Frontend:</strong></p>
+                            <ul class="small">
+                                <li>HTML5, CSS3, JavaScript ES6+</li>
+                                <li>Bootstrap 5 responsivo</li>
+                                <li>Socket.IO Client</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h6><i class="fas fa-network-wired me-2"></i>Conceitos Aplicados</h6>
+                    <ul class="mb-3">
+                        <li><strong>Protocolo HTTP:</strong> APIs REST (GET, POST, DELETE)</li>
+                        <li><strong>WebSocket:</strong> Comunicação full-duplex em tempo real</li>
+                        <li><strong>Threading:</strong> Processamento concorrente de conexões</li>
+                        <li><strong>State Management:</strong> Sincronização cliente-servidor</li>
+                        <li><strong>File Handling:</strong> Upload/download seguro com validação</li>
+                    </ul>
+
+                    <h6><i class="fas fa-shield-alt me-2"></i>Segurança</h6>
+                    <ul class="mb-3">
+                        <li>Validação de tipo MIME e assinatura binária</li>
+                        <li>Sanitização de entrada e escape de HTML</li>
+                        <li>Controle de acesso baseado em salas</li>
+                        <li>Limitação de tamanho de arquivo (16MB)</li>
+                    </ul>
+
+                    <div class="project-info">
+                        <h6><i class="fas fa-target me-2"></i>Objetivo</h6>
+                        <p class="mb-0">
+                            Demonstrar na prática os <strong>fundamentos de redes e sistemas distribuídos</strong> 
+                            através de uma aplicação funcional que implementa comunicação cliente-servidor, 
+                            gerenciamento de estado distribuído e protocolos de rede modernos.
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer flex-shrink-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Fechar
+                    </button>
                 </div>
             </div>
         </div>

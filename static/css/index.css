@@ -1,0 +1,285 @@
+/* Index Page Specific Styles - TIGHT LAYOUT */
+:root {
+    --index-primary: #0B354F;
+    --index-secondary: #7093AC;
+    --index-light: #D1D9DA;
+    --index-white: #ffffff;
+    --index-bg: #f8f9fa;
+    --index-border: 1px solid var(--index-light);
+    --index-radius: 8px;
+    --index-shadow: 0 2px 12px rgba(11, 53, 79, 0.08);
+    --index-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Usar estrutura tight do styles.css base */
+/* main-container, content-wrapper, main-content já vêm do styles.css */
+
+/* Customizações específicas para index */
+.controls-section {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--index-light);
+    background: #fafbfc;
+    flex-shrink: 0;
+}
+
+.controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.search-input {
+    width: 220px;
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--index-light);
+    border-radius: var(--index-radius);
+    font-size: 0.8rem;
+    transition: var(--index-transition);
+}
+
+.search-input:focus {
+    border-color: var(--index-primary);
+    box-shadow: 0 0 0 2px rgba(11, 53, 79, 0.1);
+    outline: none;
+}
+
+.filter-select {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--index-light);
+    border-radius: var(--index-radius);
+    font-size: 0.8rem;
+    background: white;
+    transition: var(--index-transition);
+}
+
+/* Rooms table específico para index */
+.rooms-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.rooms-table-container {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid var(--index-light);
+}
+
+.rooms-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.rooms-table th {
+    background: var(--index-bg);
+    color: var(--index-primary);
+    font-weight: 600;
+    padding: 0.4rem 0.5rem;
+    text-align: left;
+    border-bottom: 2px solid var(--index-light);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    font-size: 0.75rem;
+}
+
+.rooms-table td {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid rgba(209, 217, 218, 0.5);
+    vertical-align: middle;
+    font-size: 0.8rem;
+}
+
+.rooms-table tbody tr {
+    transition: var(--index-transition);
+    cursor: pointer;
+}
+
+.rooms-table tbody tr:hover {
+    background-color: var(--index-bg);
+}
+
+/* Room específico styles */
+.room-name {
+    font-weight: 600;
+    color: var(--index-primary);
+    margin-bottom: 0.1rem;
+    font-size: 0.85rem;
+}
+
+.room-creator {
+    font-size: 0.7rem;
+    color: var(--index-secondary);
+}
+
+.room-badge {
+    background: var(--index-primary);
+    color: white;
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--index-radius);
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+.status-badge {
+    padding: 0.15rem 0.3rem;
+    border-radius: var(--index-radius);
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+.status-badge.public {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.protected {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.room-stats {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--index-secondary);
+}
+
+.btn-join {
+    padding: 0.25rem 0.5rem;
+    background: var(--index-primary);
+    color: white;
+    border: 1px solid var(--index-primary);
+    border-radius: var(--index-radius);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: var(--index-transition);
+    text-decoration: none;
+}
+
+.btn-join:hover {
+    background: var(--index-secondary);
+    border-color: var(--index-secondary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Pagination específico */
+.pagination-section {
+    padding: 0.4rem 0.75rem;
+    border-top: 1px solid var(--index-light);
+    background: var(--index-bg);
+    flex-shrink: 0;
+}
+
+.pagination-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+}
+
+.page-btn {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--index-light);
+    background: white;
+    color: var(--index-primary);
+    border-radius: var(--index-radius);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: var(--index-transition);
+}
+
+.page-btn:hover:not(:disabled) {
+    background: var(--index-primary);
+    color: white;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-btn.active {
+    background: var(--index-primary);
+    color: white;
+}
+
+/* Empty state */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    color: var(--index-secondary);
+}
+
+.empty-state h5 {
+    color: var(--index-primary);
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    font-size: 1rem;
+}
+
+.empty-state p {
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+}
+
+/* Loading spinner */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--index-light);
+    border-top-color: var(--index-primary);
+    animation: spin 1s ease-in-out infinite;
+    border-radius: 50%;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive para index */
+@media (max-width: 768px) {
+    .controls-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.4rem;
+    }
+    
+    .controls-left,
+    .controls-right {
+        justify-content: center;
+    }
+    
+    .search-input {
+        width: 100%;
+    }
+    
+    .rooms-table {
+        font-size: 0.75rem;
+    }
+    
+    .rooms-table th,
+    .rooms-table td {
+        padding: 0.3rem 0.4rem;
+    }
+    
+    .pagination-info {
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+}
