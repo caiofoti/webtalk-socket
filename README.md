@@ -1,6 +1,6 @@
 # WebTalk Socket
 
-Sistema de comunicação em tempo real baseado em WebSockets desenvolvido para a disciplina de Redes e Sistemas Distribuídos da UFCSPA.
+Sistema de comunicação em tempo real baseado em WebSockets para a disciplina de Redes e Sistemas Distribuídos da UFCSPA.
 
 ## Funcionalidades
 
@@ -27,7 +27,7 @@ Sistema de comunicação em tempo real baseado em WebSockets desenvolvido para a
 1. Clone o repositório
 ```bash
 git clone <repository-url>
-cd webtalk-socker
+cd webtalk-socket
 ```
 
 2. Instale as dependências
@@ -50,6 +50,7 @@ python app.py
 webtalk-socker/
 ├── app.py                 # Aplicação principal
 ├── config.py              # Configurações
+├── limpar_banco.py        # Script de manutenção do banco
 ├── models/room.py         # Modelo de gerenciamento de salas
 ├── routes/                # Endpoints da API
 ├── socketio_handlers/     # Manipuladores de eventos WebSocket
@@ -58,20 +59,42 @@ webtalk-socker/
 └── uploads/               # Diretório de arquivos compartilhados
 ```
 
-## Endpoints da API
+## APIs e Endpoints
 
+### Gerenciamento de Salas
 - `GET /api/salas` - Lista salas ativas
 - `POST /api/salas` - Cria nova sala
-- `POST /api/salas/{id}/entrar` - Acessa sala
-- `POST /api/salas/{id}/upload` - Faz upload de arquivo
-- `DELETE /api/admin/salas/{id}` - Exclui sala (admin)
+- `POST /api/salas/{id}/entrar` - Valida acesso à sala
+
+### Compartilhamento de Arquivos
+- `POST /api/salas/{id}/upload` - Upload de arquivo
+- `GET /api/salas/{id}/download/{arquivo}` - Download de arquivo
+- `DELETE /api/salas/{id}/mensagens/{msg_id}` - Remove mensagem/arquivo
+
+### Administração
+- `GET /api/admin/estatisticas` - Estatísticas do sistema
+- `DELETE /api/admin/salas/{id}` - Remove sala (admin)
 
 ## Eventos WebSocket
 
 - `entrar` - Entrar na sala
 - `mensagem_chat` - Enviar mensagem
 - `arquivo_compartilhado` - Compartilhar arquivo
-- `deletar_mensagem` - Deletar mensagem
+- `deletar_mensagem` - Deletar mensagem própria
+
+## Script de Manutenção
+
+Execute o script para gerenciar o banco de dados:
+
+```bash
+python limpar_banco.py
+```
+
+**Opções disponíveis:**
+- Limpeza completa do banco e arquivos
+- Limpeza apenas dos dados (preserva estrutura)
+- Remoção de arquivos órfãos
+- Verificação de integridade
 
 ## Contexto Acadêmico
 
