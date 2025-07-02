@@ -1,13 +1,9 @@
 # WebTalk Socket
 
-<div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:20px;">
-  <div style="display:flex; gap:10px;">
-    <img src="static/images/tela-inicial-desktop.png" alt="Inicial Desktop" style="width:100px; height:auto; border-radius:6px; object-fit:cover;">
-    <img src="static/images/tela-inicial-mobile.jpg" alt="Inicial Mobile" style="width:100px; height:auto; border-radius:6px; object-fit:cover;">
-  </div>
-  <div>
-    <img src="static/images/tela-admin-desktop.png" alt="Tela Admin Desktop" style="width:100px; height:auto; border-radius:6px; object-fit:cover;">
-  </div>
+<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+  <img src="static/images/tela-inicial-desktop.png" alt="Inicial Desktop" style="width:200px; height:200px; object-fit:cover; border-radius:6px;">
+  <img src="static/images/tela-inicial-mobile.jpg" alt="Inicial Mobile" style="width:200px; height:200px; object-fit:cover; border-radius:6px;">
+  <img src="static/images/tela-admin-desktop.png" alt="Tela Admin Desktop" style="width:200px; height:200px; object-fit:cover; border-radius:6px;">
 </div>
 
 Sistema de comunicação em tempo real baseado em WebSockets para a disciplina de Redes e Sistemas Distribuídos da UFCSPA.
