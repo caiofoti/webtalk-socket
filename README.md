@@ -1,17 +1,12 @@
 # WebTalk Socket
 
-<div style="display:flex; justify-content:center; gap:20px; margin-bottom:20px;">
-  <div style="flex:1; max-width:200px;">
-    <img src="static/images/tela-inicial-desktop.png" alt="Tela Inicial Desktop" style="width:100%; height:auto; border-radius:6px; object-fit:cover;">
-    <p style="text-align:center; font-size:0.9em; margin-top:6px;">Inicial Desktop</p>
+<div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:20px;">
+  <div style="display:flex; gap:10px;">
+    <img src="static/images/tela-inicial-desktop.png" alt="Inicial Desktop" style="width:100px; height:auto; border-radius:6px; object-fit:cover;">
+    <img src="static/images/tela-inicial-mobile.jpg" alt="Inicial Mobile" style="width:100px; height:auto; border-radius:6px; object-fit:cover;">
   </div>
-  <div style="flex:1; max-width:200px;">
-    <img src="static/images/tela-inicial-mobile.jpg" alt="Tela Inicial Mobile" style="width:100%; height:auto; border-radius:6px; object-fit:cover;">
-    <p style="text-align:center; font-size:0.9em; margin-top:6px;">Inicial Mobile</p>
-  </div>
-  <div style="flex:1; max-width:200px;">
-    <img src="static/images/tela-admin-desktop.png" alt="Tela Admin Desktop" style="width:100%; height:auto; border-radius:6px; object-fit:cover;">
-    <p style="text-align:center; font-size:0.9em; margin-top:6px;">Tela Admin Desktop</p>
+  <div>
+    <img src="static/images/tela-admin-desktop.png" alt="Tela Admin Desktop" style="width:100px; height:auto; border-radius:6px; object-fit:cover;">
   </div>
 </div>
 
