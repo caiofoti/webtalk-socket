@@ -172,3 +172,14 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# VSCode workspace/settings
+.vscode/
+*.code-workspace
+
+# Arquivos de Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# Diretório de uploads gerados em runtime
+uploads/
