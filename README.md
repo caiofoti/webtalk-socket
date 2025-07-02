@@ -1,10 +1,32 @@
-# WebTalk Socket
+<p align="center">
+  <img src="static/images/ufcspa-logo.png" alt="UFCSPA Logo" height="80">
+</p>
 
-<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-  <img src="static/images/tela-inicial-desktop.png" alt="Inicial Desktop" style="width:200px; height:200px; object-fit:cover; border-radius:6px;">
-  <img src="static/images/tela-inicial-mobile.jpg" alt="Inicial Mobile" style="width:200px; height:200px; object-fit:cover; border-radius:6px;">
-  <img src="static/images/tela-admin-desktop.png" alt="Tela Admin Desktop" style="width:200px; height:200px; object-fit:cover; border-radius:6px;">
-</div>
+<h1 align="center">WebTalk Socket</h1>
+
+<p align="center">
+  <em>Sistema de comunicação em tempo real baseado em WebSockets para a disciplina de Redes e Sistemas Distribuídos da UFCSPA.</em>
+</p>
+
+---
+
+<p align="center">
+  <img src="static/images/tela-inicial-desktop.png" alt="Tela Inicial Desktop" width="400">
+  <br>
+  <strong>Tela Inicial (Desktop)</strong>
+</p>
+
+<p align="center">
+  <img src="static/images/tela-inicial-mobile.jpg" alt="Tela Inicial Mobile" width="200">
+  <br>
+  <strong>Tela Inicial (Mobile)</strong>
+</p>
+
+<p align="center">
+  <img src="static/images/tela-admin-desktop.png" alt="Tela Administrativa Desktop" width="400">
+  <br>
+  <strong>Painel Administrativo (Desktop)</strong>
+</p>
 
 Sistema de comunicação em tempo real baseado em WebSockets para a disciplina de Redes e Sistemas Distribuídos da UFCSPA.
 
