@@ -5,7 +5,7 @@
 <h1 align="center">WebTalk Socket</h1>
 
 <p align="center">
-  <em>Sistema de comunicação em tempo real baseado em WebSockets para a disciplina de Redes e Sistemas Distribuídos da UFCSPA.</em>
+  <em>Sistema de comunicação em tempo real baseado em WebSockets para a disciplina de Redes de Computadores e Sistemas Distribuídos da UFCSPA.</em>
 </p>
 
 ---
@@ -27,8 +27,6 @@
   <br>
   <strong>Painel Administrativo (Desktop)</strong>
 </p>
-
-Sistema de comunicação em tempo real baseado em WebSockets para a disciplina de Redes e Sistemas Distribuídos da UFCSPA.
 
 ## Funcionalidades
 
@@ -128,7 +126,7 @@ python limpar_banco.py
 
 **Universidade:** Universidade Federal de Ciências da Saúde de Porto Alegre (UFCSPA)  
 **Curso:** Bacharelado em Informática Biomédica  
-**Disciplina:** Fundamentos de Redes e Sistemas Distribuídos  
+**Disciplina:** Fundamentos de Redes de Computador e Sistemas Distribuídos  
 **Professor:** João Carlos Gluz
 
 **Equipe:**
