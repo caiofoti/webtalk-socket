@@ -1,15 +1,15 @@
 # WebTalk Socket
 
 <div style="display:flex; justify-content:center; gap:20px; margin-bottom:20px;">
-  <div style="flex:1; max-width:300px;">
+  <div style="flex:1; max-width:200px;">
     <img src="static/images/tela-inicial-desktop.png" alt="Tela Inicial Desktop" style="width:100%; height:auto; border-radius:6px; object-fit:cover;">
     <p style="text-align:center; font-size:0.9em; margin-top:6px;">Inicial Desktop</p>
   </div>
-  <div style="flex:1; max-width:300px;">
+  <div style="flex:1; max-width:200px;">
     <img src="static/images/tela-inicial-mobile.jpg" alt="Tela Inicial Mobile" style="width:100%; height:auto; border-radius:6px; object-fit:cover;">
     <p style="text-align:center; font-size:0.9em; margin-top:6px;">Inicial Mobile</p>
   </div>
-  <div style="flex:1; max-width:300px;">
+  <div style="flex:1; max-width:200px;">
     <img src="static/images/tela-admin-desktop.png" alt="Tela Admin Desktop" style="width:100%; height:auto; border-radius:6px; object-fit:cover;">
     <p style="text-align:center; font-size:0.9em; margin-top:6px;">Tela Admin Desktop</p>
   </div>
