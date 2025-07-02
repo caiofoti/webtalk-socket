@@ -1,12 +1,12 @@
 # WebTalk Socket
 
-<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:20px;">
-  <img src="static/images/ufcspa-logo.png" alt="UFCSPA Logo" style="height:80px;">
-  <img src="static/images/tela-inicial-desktop.png" alt="Tela Inicial Desktop" style="width:200px;">
-  <img src="static/images/tela-chat-desktop.png" alt="Tela Chat Desktop" style="width:200px;">
-  <img src="static/images/tela-chat-desktop-anexo.png" alt="Tela Chat com Anexo" style="width:200px;">
-  <img src="static/images/tela-admin-desktop.png" alt="Tela Admin Desktop" style="width:200px;">
-  <img src="static/images/tela-inicial-mobile.jpg" alt="Tela Inicial Mobile" style="width:120px;">
+<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:12px; margin-bottom:20px;">
+  <img src="static/images/ufcspa-logo.png" alt="UFCSPA Logo" style="grid-column: span 2; height:80px; object-fit:contain; margin:auto;">
+  <img src="static/images/tela-inicial-desktop.png" alt="Tela Inicial Desktop" style="width:200px; height:150px; object-fit:cover; border-radius:4px;">
+  <img src="static/images/tela-chat-desktop.png" alt="Tela Chat Desktop" style="width:200px; height:150px; object-fit:cover; border-radius:4px;">
+  <img src="static/images/tela-chat-desktop-anexo.png" alt="Tela Chat com Anexo" style="width:200px; height:150px; object-fit:cover; border-radius:4px;">
+  <img src="static/images/tela-admin-desktop.png" alt="Tela Admin Desktop" style="width:200px; height:150px; object-fit:cover; border-radius:4px;">
+  <img src="static/images/tela-inicial-mobile.jpg" alt="Tela Inicial Mobile" style="width:200px; height:150px; object-fit:cover; border-radius:4px;">
 </div>
 
 Sistema de comunicação em tempo real baseado em WebSockets para a disciplina de Redes e Sistemas Distribuídos da UFCSPA.
