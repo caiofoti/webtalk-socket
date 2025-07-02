@@ -1,9 +1,9 @@
-from flask import Blueprint, render_template, request, jsonify, send_from_directory
-from werkzeug.utils import secure_filename
-from models.room import gerenciador_salas
 import os
 import uuid
 import shutil
+from flask import Blueprint, render_template, request, jsonify, send_from_directory
+from werkzeug.utils import secure_filename
+from models.room import gerenciador_salas
 
 main_bp = Blueprint('main', __name__)
 
@@ -38,8 +38,8 @@ def chat(id_sala):
     room_data = {
         'id': sala.id,
         'name': sala.nome,
-        'criador': sala.criador,  # GARANTIR que o criador está sendo passado
-        'senha': bool(sala.senha)  # Passar se tem senha para mostrar ícone
+        'criador': sala.criador,
+        'senha': bool(sala.senha)
     }
 
     return render_template('chat.html', room=room_data)
@@ -49,8 +49,16 @@ def chat(id_sala):
 def obter_salas():
     """API endpoint para listar todas as salas ativas"""
     try:
+        # Debug: verificar user agent para mobile
+        user_agent = request.headers.get('User-Agent', '')
+        is_mobile = any(device in user_agent.lower()
+                        for device in ['mobile', 'android', 'iphone', 'ipad'])
+
         salas = [sala.para_dicionario()
                  for sala in gerenciador_salas.obter_todas_salas() if sala.esta_ativa]
+
+        print(f"[API] Retornando {len(salas)} salas. Mobile: {is_mobile}")
+
         return jsonify(salas)
     except Exception as e:
         print(f"[API ERROR] Falha ao buscar salas: {e}")
@@ -73,7 +81,6 @@ def criar_sala():
         if not nome or not criador:
             return jsonify({'erro': 'Nome da sala e criador são obrigatórios'}), 400
 
-        # Verificar se o nome da sala não é muito longo
         if len(nome) > 50:
             return jsonify({'erro': 'Nome da sala muito longo (máximo 50 caracteres)'}), 400
 
@@ -114,7 +121,7 @@ def entrar_sala(id_sala):
 
 @main_bp.route('/api/salas/<id_sala>/upload', methods=['POST'])
 def upload_arquivo(id_sala):
-    """API endpoint para upload de arquivos na sala com validação robusta"""
+    """API endpoint para upload de arquivos na sala com validação robusta e suporte móvel"""
     arquivo_salvo = None
     pasta_temp = None
     try:
@@ -125,7 +132,6 @@ def upload_arquivo(id_sala):
         if not sala.esta_ativa:
             return jsonify({'erro': 'Sala não está ativa'}), 403
 
-        # Verificar se o arquivo foi enviado
         if 'arquivo' not in request.files:
             return jsonify({'erro': 'Nenhum arquivo enviado'}), 400
 
@@ -138,13 +144,24 @@ def upload_arquivo(id_sala):
         if arquivo.filename == '':
             return jsonify({'erro': 'Nenhum arquivo selecionado'}), 400
 
+        # MOBILE-SPECIFIC: Better file validation for mobile uploads
+        # Check if request is from mobile device
+        user_agent = request.headers.get('User-Agent', '').lower()
+        is_mobile = any(mobile in user_agent for mobile in [
+                        'mobile', 'android', 'iphone', 'ipad', 'tablet'])
+
         # Verificar tamanho do arquivo
         arquivo.seek(0, os.SEEK_END)
         tamanho_arquivo = arquivo.tell()
         arquivo.seek(0)
 
-        if tamanho_arquivo > MAX_FILE_SIZE:
-            return jsonify({'erro': 'Arquivo muito grande (máximo 16MB)'}), 400
+        # Mobile devices may have smaller memory constraints
+        max_size = MAX_FILE_SIZE if not is_mobile else min(
+            MAX_FILE_SIZE, 8 * 1024 * 1024)  # 8MB for mobile
+
+        if tamanho_arquivo > max_size:
+            max_mb = max_size // (1024 * 1024)
+            return jsonify({'erro': f'Arquivo muito grande (máximo {max_mb}MB para dispositivos móveis)'}), 400
 
         if tamanho_arquivo == 0:
             return jsonify({'erro': 'Arquivo está vazio'}), 400
@@ -154,6 +171,9 @@ def upload_arquivo(id_sala):
             nome_original = secure_filename(arquivo.filename)
             if not nome_original:
                 return jsonify({'erro': 'Nome de arquivo inválido'}), 400
+
+            # MOBILE FIX: Handle special characters and spaces better
+            nome_original = nome_original.replace(' ', '_')
 
             extensao = nome_original.rsplit('.', 1)[1].lower()
             nome_unico = f"{uuid.uuid4().hex}.{extensao}"
@@ -226,7 +246,8 @@ def upload_arquivo(id_sala):
                 'nome_arquivo': nome_original,
                 'tipo_arquivo': extensao,
                 'id_mensagem': mensagem_arquivo['id'],
-                'tamanho': tamanho_arquivo
+                'tamanho': tamanho_arquivo,
+                'mobile': is_mobile
             })
 
         return jsonify({'erro': 'Tipo de arquivo não permitido. Use: PDF, JPG, JPEG, PNG'}), 400
@@ -313,13 +334,10 @@ def download_arquivo(id_sala, nome_arquivo):
         force_download = request.args.get(
             'download', 'false').lower() == 'true'
 
-        print(
-            f"[DOWNLOAD] Servindo arquivo: {arquivo_fisico_encontrado} (download forçado: {force_download})")
-
         return send_from_directory(
             pasta_sala,
             arquivo_fisico_encontrado,
-            as_attachment=force_download,  # Só força download se solicitado
+            as_attachment=force_download,
             download_name=nome_arquivo if force_download else None
         )
 
@@ -337,6 +355,27 @@ def deletar_mensagem(id_sala, id_mensagem):
 
         if not nome_usuario:
             return jsonify({'erro': 'Nome de usuário é obrigatório'}), 400
+
+        sala = gerenciador_salas.obter_sala(id_sala)
+        if not sala:
+            return jsonify({'erro': 'Sala não encontrada'}), 404
+
+        if not sala.esta_ativa:
+            return jsonify({'erro': 'Sala não está ativa'}), 403
+
+        # Tentar remover a mensagem
+        sucesso = gerenciador_salas.remover_mensagem_da_sala(
+            id_sala, id_mensagem, nome_usuario)
+
+        if sucesso:
+            return jsonify({'mensagem': 'Mensagem removida com sucesso'})
+        else:
+            return jsonify({'erro': 'Mensagem não encontrada ou você não tem permissão para removê-la'}), 403
+
+    except Exception as e:
+        print(f"[API ERROR] Falha ao deletar mensagem: {e}")
+        return jsonify({'erro': 'Erro interno do servidor'}), 500
+        return jsonify({'erro': 'Nome de usuário é obrigatório'}), 400
 
         sala = gerenciador_salas.obter_sala(id_sala)
         if not sala:

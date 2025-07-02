@@ -63,52 +63,55 @@
 
                 <div class="rooms-section">
                     <div class="rooms-table-container">
-                        <table class="rooms-table" id="roomsTable">
+                        <!-- Desktop Table -->
+                        <table class="rooms-table">
                             <thead>
                                 <tr>
-                                    <th scope="col">Sala</th>
-                                    <th scope="col">Código</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Atividade</th>
-                                    <th scope="col">Criada em</th>
-                                    <th scope="col">Ação</th>
+                                    <th>SALA</th>
+                                    <th>CÓDIGO</th>
+                                    <th>STATUS</th>
+                                    <th>ATIVIDADE</th>
+                                    <th>CRIADO</th>
+                                    <th>AÇÕES</th>
                                 </tr>
                             </thead>
                             <tbody id="roomsTableBody">
-                                <tr>
-                                    <td colspan="6" class="text-center" style="padding: 2rem;">
-                                        <div class="loading" aria-label="Carregando"></div>
-                                        <div style="margin-top: 0.5rem;">Carregando salas...</div>
-                                    </td>
-                                </tr>
+                                <!-- Rooms will be populated here -->
                             </tbody>
                         </table>
+                        
+                        <!-- Mobile Cards Container -->
+                        <div class="mobile-rooms-container" style="display: none;">
+                            <!-- Mobile cards will be populated here -->
+                        </div>
                     </div>
                     
+                    <!-- PAGINATION CONTROLS -->
                     <div class="pagination-section">
                         <div class="pagination-info">
-                            <div class="pagination-text" id="paginationInfo">
-                                Mostrando 0 de 0 salas
+                            <span id="paginationInfo">Carregando...</span>
+                        </div>
+                        
+                        <div class="pagination-controls">
+                            <button id="prevBtn" 
+                                    class="pagination-btn" 
+                                    title="Página anterior"
+                                    aria-label="Ir para página anterior">
+                                <i class="fas fa-chevron-left"></i>
+                                <span>Anterior</span>
+                            </button>
+                            
+                            <div class="page-numbers" id="pageNumbers">
+                                <!-- Page numbers will be populated here -->
                             </div>
-                            <div class="pagination-controls" id="paginationControls">
-                                <button class="page-btn" 
-                                        id="prevBtn" 
-                                        onclick="mudarPagina(-1)" 
-                                        disabled
-                                        title="Página anterior"
-                                        aria-label="Ir para página anterior">
-                                    <i class="fas fa-chevron-left" aria-hidden="true"></i> Anterior
-                                </button>
-                                <span id="pageNumbers" role="navigation" aria-label="Páginas disponíveis"></span>
-                                <button class="page-btn" 
-                                        id="nextBtn" 
-                                        onclick="mudarPagina(1)" 
-                                        disabled
-                                        title="Próxima página"
-                                        aria-label="Ir para próxima página">
-                                    Próxima <i class="fas fa-chevron-right" aria-hidden="true"></i>
-                                </button>
-                            </div>
+                            
+                            <button id="nextBtn" 
+                                    class="pagination-btn" 
+                                    title="Próxima página"
+                                    aria-label="Ir para próxima página">
+                                <span>Próxima</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -1,7 +1,8 @@
 let salasData = [];
 let salasFiltradas = [];
 let paginaAtual = 1;
-const itensPorPagina = 10;
+// RESPONSIVE ITEMS PER PAGE
+let itensPorPagina = window.innerWidth <= 768 ? 3 : 5;
 let carregandoSalas = false;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -19,6 +20,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Search and filter event listeners
     document.getElementById('searchInput').addEventListener('input', filtrarSalas);
     document.getElementById('filterStatus').addEventListener('change', filtrarSalas);
+    
+    // PAGINATION EVENT LISTENERS - FIX
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            mudarPagina(-1);
+        });
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            mudarPagina(1);
+        });
+    }
     
     // Carregar salas inicialmente
     carregarSalas();
@@ -65,134 +84,158 @@ function carregarSalas() {
         });
 }
 
-function filtrarSalas() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const statusFilter = document.getElementById('filterStatus').value;
+function atualizarPaginacao() {
+    // UPDATE ITEMS PER PAGE BASED ON CURRENT SCREEN SIZE
+    const novoItensPorPagina = window.innerWidth <= 768 ? 3 : 5;
     
-    salasFiltradas = salasData.filter(sala => {
-        const matchesSearch = sala.nome.toLowerCase().includes(searchTerm) || 
-                            sala.criador.toLowerCase().includes(searchTerm);
-        
-        const matchesStatus = statusFilter === 'all' || 
-                            (statusFilter === 'public' && !sala.tem_senha) ||
-                            (statusFilter === 'protected' && sala.tem_senha);
-        
-        return matchesSearch && matchesStatus;
-    });
-    
-    paginaAtual = 1;
-    exibirSalas();
-    atualizarPaginacao();
-}
-
-function exibirSalas() {
-    const tableBody = document.getElementById('roomsTableBody');
-    
-    if (salasFiltradas.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="6" class="text-center" style="padding: 3rem;">
-                    <div class="empty-state">
-                        <h5>Nenhuma sala encontrada</h5>
-                        <p>Não há salas que correspondam aos critérios de busca</p>
-                        <button class="btn-control" data-bs-toggle="modal" data-bs-target="#criarSalaModal">
-                            <i class="fas fa-plus"></i> Criar Nova Sala
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-        return;
+    // Se mudou o número de itens por página, recalcular página atual
+    if (novoItensPorPagina !== itensPorPagina) {
+        const itemAtual = (paginaAtual - 1) * itensPorPagina;
+        itensPorPagina = novoItensPorPagina;
+        paginaAtual = Math.floor(itemAtual / itensPorPagina) + 1;
+        console.log(`[PAGINATION] Items per page changed to ${itensPorPagina}, adjusted to page ${paginaAtual}`);
     }
     
-    const inicio = (paginaAtual - 1) * itensPorPagina;
-    const fim = inicio + itensPorPagina;
-    const salasExibidas = salasFiltradas.slice(inicio, fim);
-    
-    tableBody.innerHTML = salasExibidas.map(sala => `
-        <tr onclick="entrarNaSalaClique('${sala.id}', '${sala.nome}', ${sala.tem_senha})">
-            <td>
-                <div class="room-name">${sala.nome}</div>
-                <div class="room-creator">Por ${sala.criador}</div>
-            </td>
-            <td>
-                <span class="room-badge">${sala.id}</span>
-            </td>
-            <td>
-                <span class="status-badge ${sala.tem_senha ? 'protected' : 'public'}">
-                    <i class="fas fa-${sala.tem_senha ? 'lock' : 'globe'}"></i>
-                    ${sala.tem_senha ? 'Protegida' : 'Pública'}
-                </span>
-            </td>
-            <td>
-                <div class="room-stats">
-                    <span><i class="fas fa-users"></i> ${sala.contador_usuarios || 0}</span>
-                    <span><i class="fas fa-comments"></i> ${sala.contador_mensagens || 0}</span>
-                </div>
-            </td>
-            <td>
-                <small>${formatarData(sala.criado_em)}</small>
-            </td>
-            <td>
-                <div class="room-actions">
-                    <button class="btn-join" onclick="event.stopPropagation(); entrarNaSalaClique('${sala.id}', '${sala.nome}', ${sala.tem_senha})" title="Entrar na sala">
-                        <i class="fas fa-sign-in-alt"></i> Entrar
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function atualizarPaginacao() {
     const totalPaginas = Math.ceil(salasFiltradas.length / itensPorPagina);
     const inicio = (paginaAtual - 1) * itensPorPagina + 1;
     const fim = Math.min(paginaAtual * itensPorPagina, salasFiltradas.length);
     
-    document.getElementById('paginationInfo').textContent = 
-        `Mostrando ${inicio}-${fim} de ${salasFiltradas.length} salas`;
+    // Update pagination info
+    const paginationInfo = document.getElementById('paginationInfo');
+    if (paginationInfo) {
+        if (salasFiltradas.length === 0) {
+            paginationInfo.textContent = 'Nenhuma sala encontrada';
+        } else {
+            const isMobile = window.innerWidth <= 768;
+            const deviceText = isMobile ? 'móvel' : 'desktop';
+            paginationInfo.textContent = `${inicio}-${fim} de ${salasFiltradas.length} salas (${itensPorPagina}/página - ${deviceText})`;
+        }
+    }
     
-    document.getElementById('prevBtn').disabled = paginaAtual <= 1;
-    document.getElementById('nextBtn').disabled = paginaAtual >= totalPaginas;
+    // Update navigation buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
     
-    // Atualizar números das páginas
+    if (prevBtn) {
+        prevBtn.disabled = paginaAtual <= 1;
+        prevBtn.classList.toggle('disabled', paginaAtual <= 1);
+    }
+    
+    if (nextBtn) {
+        nextBtn.disabled = paginaAtual >= totalPaginas || totalPaginas === 0;
+        nextBtn.classList.toggle('disabled', paginaAtual >= totalPaginas || totalPaginas === 0);
+    }
+    
+    // Update page numbers with optimized display for 5 items
     const pageNumbers = document.getElementById('pageNumbers');
-    pageNumbers.innerHTML = '';
-    
-    const maxPages = 5;
-    let startPage = Math.max(1, paginaAtual - Math.floor(maxPages / 2));
-    let endPage = Math.min(totalPaginas, startPage + maxPages - 1);
-    
-    if (endPage - startPage + 1 < maxPages) {
-        startPage = Math.max(1, endPage - maxPages + 1);
+    if (pageNumbers) {
+        pageNumbers.innerHTML = '';
+        
+        if (totalPaginas > 0) {
+            const isMobile = window.innerWidth <= 768;
+            const maxPages = isMobile ? 3 : 7; // More page numbers on desktop for 5-item pagination
+            
+            let startPage = Math.max(1, paginaAtual - Math.floor(maxPages / 2));
+            let endPage = Math.min(totalPaginas, startPage + maxPages - 1);
+            
+            // Adjust start page if we're near the end
+            if (endPage - startPage + 1 < maxPages) {
+                startPage = Math.max(1, endPage - maxPages + 1);
+            }
+            
+            // Add "First" button if needed (only on desktop)
+            if (!isMobile && startPage > 1) {
+                const firstBtn = document.createElement('button');
+                firstBtn.className = 'page-btn';
+                firstBtn.textContent = '1';
+                firstBtn.title = 'Ir para primeira página';
+                firstBtn.onclick = () => irParaPagina(1);
+                pageNumbers.appendChild(firstBtn);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'page-ellipsis';
+                    ellipsis.textContent = '...';
+                    pageNumbers.appendChild(ellipsis);
+                }
+            }
+            
+            // Add page number buttons
+            for (let i = startPage; i <= endPage; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === paginaAtual ? 'active' : ''}`;
+                btn.textContent = i;
+                btn.title = `Ir para página ${i}`;
+                btn.setAttribute('aria-label', `Ir para página ${i}`);
+                btn.onclick = () => irParaPagina(i);
+                pageNumbers.appendChild(btn);
+            }
+            
+            // Add "Last" button if needed (only on desktop)
+            if (!isMobile && endPage < totalPaginas) {
+                if (endPage < totalPaginas - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'page-ellipsis';
+                    ellipsis.textContent = '...';
+                    pageNumbers.appendChild(ellipsis);
+                }
+                
+                const lastBtn = document.createElement('button');
+                lastBtn.className = 'page-btn';
+                lastBtn.textContent = totalPaginas;
+                lastBtn.title = 'Ir para última página';
+                lastBtn.onclick = () => irParaPagina(totalPaginas);
+                pageNumbers.appendChild(lastBtn);
+            }
+        }
     }
     
-    for (let i = startPage; i <= endPage; i++) {
-        const btn = document.createElement('button');
-        btn.className = `page-btn ${i === paginaAtual ? 'active' : ''}`;
-        btn.textContent = i;
-        btn.title = `Ir para página ${i}`;
-        btn.setAttribute('aria-label', `Ir para página ${i}`);
-        btn.onclick = () => irParaPagina(i);
-        pageNumbers.appendChild(btn);
-    }
+    console.log(`[PAGINATION] Página ${paginaAtual} de ${totalPaginas} (${salasFiltradas.length} salas, ${itensPorPagina} por página)`);
 }
 
 function mudarPagina(direcao) {
     const totalPaginas = Math.ceil(salasFiltradas.length / itensPorPagina);
     const novaPagina = paginaAtual + direcao;
     
+    console.log(`[PAGINATION] Tentando mudar da página ${paginaAtual} para ${novaPagina}`);
+    
     if (novaPagina >= 1 && novaPagina <= totalPaginas) {
         paginaAtual = novaPagina;
         exibirSalas();
         atualizarPaginacao();
+        
+        // Scroll to top of rooms section
+        const roomsSection = document.querySelector('.rooms-section');
+        if (roomsSection) {
+            roomsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        console.log(`[PAGINATION] Mudou para página ${paginaAtual}`);
+    } else {
+        console.log(`[PAGINATION] Página ${novaPagina} inválida (total: ${totalPaginas})`);
     }
 }
 
 function irParaPagina(pagina) {
-    paginaAtual = pagina;
-    exibirSalas();
-    atualizarPaginacao();
+    const totalPaginas = Math.ceil(salasFiltradas.length / itensPorPagina);
+    
+    console.log(`[PAGINATION] Indo diretamente para página ${pagina}`);
+    
+    if (pagina >= 1 && pagina <= totalPaginas) {
+        paginaAtual = pagina;
+        exibirSalas();
+        atualizarPaginacao();
+        
+        // Scroll to top of rooms section
+        const roomsSection = document.querySelector('.rooms-section');
+        if (roomsSection) {
+            roomsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        console.log(`[PAGINATION] Foi para página ${paginaAtual}`);
+    } else {
+        console.log(`[PAGINATION] Página ${pagina} inválida (total: ${totalPaginas})`);
+    }
 }
 
 function criarSala() {
@@ -388,4 +431,263 @@ function obterIconeAlerta(tipo) {
         'info': 'info-circle'
     };
     return icones[tipo] || 'info-circle';
+}
+
+// Mobile-specific optimizations
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle mobile file inputs with better UX
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && window.innerWidth <= 768) {
+                // Mobile file validation with user feedback
+                const maxSize = 16 * 1024 * 1024; // 16MB
+                if (file.size > maxSize) {
+                    mostrarAlerta('Arquivo muito grande! Máximo: 16MB', 'warning');
+                    this.value = '';
+                    return;
+                }
+                
+                // Show file selected feedback on mobile
+                const fileName = file.name.length > 20 ? 
+                    file.name.substring(0, 20) + '...' : file.name;
+                mostrarAlerta(`Arquivo selecionado: ${fileName}`, 'info');
+            }
+        });
+    });
+    
+    let resizeTimer;
+    let currentViewMode = window.innerWidth <= 768 ? 'mobile' : 'desktop';
+    let currentItemsPerPage = window.innerWidth <= 768 ? 3 : 5; // Fixed values
+    
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            const newViewMode = window.innerWidth <= 768 ? 'mobile' : 'desktop';
+            const newItemsPerPage = window.innerWidth <= 768 ? 3 : 5; // Fixed values
+            
+            const viewModeChanged = newViewMode !== currentViewMode;
+            const itemsPerPageChanged = newItemsPerPage !== currentItemsPerPage;
+            
+            if (viewModeChanged || itemsPerPageChanged) {
+                currentViewMode = newViewMode;
+                currentItemsPerPage = newItemsPerPage;
+                
+                console.log(`[RESPONSIVE] Changed to ${currentViewMode} mode (${currentItemsPerPage} items per page)`);
+                
+                if (typeof exibirSalas === 'function' && salasData.length > 0) {
+                    itensPorPagina = currentItemsPerPage;
+                    filtrarSalas();
+                }
+            }
+        }, 250);
+    });
+    
+    // Forçar re-renderização inicial para mobile
+    setTimeout(() => {
+        if (window.innerWidth <= 768 && salasData.length > 0) {
+            console.log('[MOBILE] Forçando re-renderização inicial');
+            exibirSalas();
+        }
+    }, 500);
+});
+
+function filtrarSalas() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('filterStatus').value;
+    
+    salasFiltradas = salasData.filter(sala => {
+        const matchesSearch = sala.nome.toLowerCase().includes(searchTerm) || 
+                            sala.criador.toLowerCase().includes(searchTerm);
+        
+        const matchesStatus = statusFilter === 'all' || 
+                            (statusFilter === 'public' && !sala.tem_senha) ||
+                            (statusFilter === 'protected' && sala.tem_senha);
+        
+        return matchesSearch && matchesStatus;
+    });
+    
+    // RESET PAGINATION TO FIRST PAGE WHEN FILTERING
+    paginaAtual = 1;
+    exibirSalas();
+    atualizarPaginacao();
+    
+    console.log(`[FILTER] Filtradas ${salasFiltradas.length} salas de ${salasData.length} total`);
+}
+
+
+function exibirSalas() {
+    const tableBody = document.getElementById('roomsTableBody');
+    const isMobile = window.innerWidth <= 768;
+    
+    if (salasFiltradas.length === 0) {
+        if (isMobile) {
+            // Mobile empty state
+            const tableContainer = tableBody.closest('.rooms-table-container');
+            if (tableContainer) {
+                // Hide table and show mobile container
+                const table = tableContainer.querySelector('.rooms-table');
+                if (table) {
+                    table.style.display = 'none';
+                }
+                
+                let mobileContainer = tableContainer.querySelector('.mobile-rooms-container');
+                if (!mobileContainer) {
+                    mobileContainer = document.createElement('div');
+                    mobileContainer.className = 'mobile-rooms-container';
+                    tableContainer.appendChild(mobileContainer);
+                }
+                
+                mobileContainer.style.display = 'grid';
+                mobileContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h5>Nenhuma sala encontrada</h5>
+                        <p>Não há salas que correspondam aos critérios de busca</p>
+                        <button class="btn-control" data-bs-toggle="modal" data-bs-target="#criarSalaModal">
+                            <i class="fas fa-plus"></i> Criar Nova Sala
+                        </button>
+                    </div>
+                `;
+            }
+        } else {
+            // Desktop empty state
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center" style="padding: 3rem;">
+                        <div class="empty-state">
+                            <h5>Nenhuma sala encontrada</h5>
+                            <p>Não há salas que correspondam aos critérios de busca</p>
+                            <button class="btn-control" data-bs-toggle="modal" data-bs-target="#criarSalaModal">
+                                <i class="fas fa-plus"></i> Criar Nova Sala
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+        return;
+    }
+    
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const salasExibidas = salasFiltradas.slice(inicio, fim);
+    
+    if (isMobile) {
+        // Mobile card layout
+        const tableContainer = tableBody.closest('.rooms-table-container');
+        const table = tableContainer.querySelector('.rooms-table');
+        
+        // Hide table on mobile
+        if (table) {
+            table.style.display = 'none';
+        }
+        
+        // Find or create mobile container
+        let mobileContainer = tableContainer.querySelector('.mobile-rooms-container');
+        if (!mobileContainer) {
+            mobileContainer = document.createElement('div');
+            mobileContainer.className = 'mobile-rooms-container';
+            tableContainer.appendChild(mobileContainer);
+        }
+        
+        // Show mobile container
+        mobileContainer.style.display = 'grid';
+        
+        // Render mobile cards
+        mobileContainer.innerHTML = salasExibidas.map(sala => `
+            <div class="mobile-room-card" onclick="entrarNaSalaClique('${sala.id}', '${escaparHtml(sala.nome)}', ${sala.tem_senha})">
+                <div class="mobile-room-header">
+                    <div class="mobile-room-info">
+                        <h3 class="mobile-room-name">${escaparHtml(sala.nome)}</h3>
+                        <p class="mobile-room-creator">Por ${escaparHtml(sala.criador)}</p>
+                    </div>
+                    <span class="mobile-room-badge">${sala.id}</span>
+                </div>
+                <div class="mobile-room-body">
+                    <div class="mobile-room-meta">
+                        <div class="mobile-room-status">
+                            <span class="mobile-status-badge ${sala.tem_senha ? 'protected' : 'public'}">
+                                <i class="fas fa-${sala.tem_senha ? 'lock' : 'globe'}"></i>
+                                ${sala.tem_senha ? 'Protegida' : 'Pública'}
+                            </span>
+                            <div class="mobile-room-stats">
+                                <span><i class="fas fa-users"></i> ${sala.contador_usuarios || 0}</span>
+                                <span><i class="fas fa-comments"></i> ${sala.contador_mensagens || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mobile-room-footer">
+                        <div class="mobile-room-date">${formatarData(sala.criado_em)}</div>
+                        <button class="mobile-join-btn" onclick="event.stopPropagation(); entrarNaSalaClique('${sala.id}', '${escaparHtml(sala.nome)}', ${sala.tem_senha})" title="Entrar na sala">
+                            <i class="fas fa-sign-in-alt"></i> Entrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        console.log(`[MOBILE] Rendered ${salasExibidas.length} rooms in cards`);
+        
+    } else {
+        // Desktop table layout
+        const tableContainer = tableBody.closest('.rooms-table-container');
+        const table = tableContainer.querySelector('.rooms-table');
+        const mobileContainer = tableContainer.querySelector('.mobile-rooms-container');
+        
+        // Show table on desktop
+        if (table) {
+            table.style.display = 'table';
+        }
+        
+        // Hide mobile container on desktop
+        if (mobileContainer) {
+            mobileContainer.style.display = 'none';
+        }
+        
+        // Render desktop table
+        tableBody.innerHTML = salasExibidas.map(sala => `
+            <tr onclick="entrarNaSalaClique('${sala.id}', '${escaparHtml(sala.nome)}', ${sala.tem_senha})">
+                <td>
+                    <div class="room-name">${escaparHtml(sala.nome)}</div>
+                    <div class="room-creator">Por ${escaparHtml(sala.criador)}</div>
+                </td>
+                <td>
+                    <span class="room-badge">${sala.id}</span>
+                </td>
+                <td>
+                    <span class="status-badge ${sala.tem_senha ? 'protected' : 'public'}">
+                        <i class="fas fa-${sala.tem_senha ? 'lock' : 'globe'}"></i>
+                        ${sala.tem_senha ? 'Protegida' : 'Pública'}
+                    </span>
+                </td>
+                <td>
+                    <div class="room-stats">
+                        <span><i class="fas fa-users"></i> ${sala.contador_usuarios || 0}</span>
+                        <span><i class="fas fa-comments"></i> ${sala.contador_mensagens || 0}</span>
+                    </div>
+                </td>
+                <td>
+                    <small>${formatarData(sala.criado_em)}</small>
+                </td>
+                <td>
+                    <div class="room-actions">
+                        <button class="btn-join" onclick="event.stopPropagation(); entrarNaSalaClique('${sala.id}', '${escaparHtml(sala.nome)}', ${sala.tem_senha})" title="Entrar na sala">
+                            <i class="fas fa-sign-in-alt"></i> Entrar
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+        
+        console.log(`[DESKTOP] Rendered ${salasExibidas.length} rooms in table`);
+    }
+}
+
+// Adicionar função para escapar HTML
+function escaparHtml(texto) {
+    if (typeof texto !== 'string') return texto;
+    const div = document.createElement('div');
+    div.textContent = texto;
+    return div.innerHTML;
 }
