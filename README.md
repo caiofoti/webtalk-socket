@@ -42,6 +42,144 @@
 - **Frontend:** HTML5, CSS3, JavaScript, Bootstrap 5
 - **Protocolos:** HTTP/REST, WebSocket, JSON
 
+## Arquitetura e Funcionamento
+
+### Visão Geral do Sistema
+
+O WebTalk Socket implementa uma arquitetura cliente-servidor distribuída que combina **REST APIs** para operações CRUD e **WebSocket** para comunicação em tempo real. O sistema integra Flask (HTTP) e Flask-SocketIO (WebSocket) em um único processo, compartilhando a mesma porta e garantindo sincronização eficiente.
+
+### 1. Inicialização e Fluxo de Acesso
+
+**Startup do Sistema:**
+- O `app.py` inicializa simultaneamente o servidor Flask e Socket.IO
+- Flask serve páginas HTML e APIs REST
+- Socket.IO gerencia comunicação WebSocket em tempo real
+
+**Fluxo de Usuário:**
+1. **Acesso inicial:** Usuário acessa `/` → Flask renderiza `index.html` → Carrega `main.js`
+2. **Listagem de salas:** JavaScript executa `fetch('/api/salas')` → Backend retorna salas ativas em JSON
+3. **Interface responsiva:** Exibição em tabela (desktop) ou cards (mobile) com paginação dinâmica
+
+### 2. Gerenciamento de Salas (CRUD)
+
+**Criação de Sala:**
+```
+POST /api/salas → Validação → Persistência SQLite → Retorno do ID único
+```
+
+**Acesso a Sala:**
+```
+POST /api/salas/{id}/entrar → Validação de senha → Autorização → Redirecionamento
+```
+
+**Validação de Segurança:**
+- Salas protegidas por senha opcional
+- Validação de entrada antes do acesso ao chat
+- IDs únicos de 8 caracteres para cada sala
+
+### 3. Comunicação em Tempo Real (WebSocket)
+
+**Estabelecimento de Conexão:**
+```javascript
+// Cliente conecta via Socket.IO
+socket = io();
+socket.emit('entrar', {id_sala: roomId, username: username});
+```
+
+**Eventos WebSocket Principais:**
+- `entrar` - Adiciona usuário à sala, envia histórico de mensagens
+- `mensagem_chat` - Recebe, persiste e distribui mensagens instantaneamente
+- `arquivo_compartilhado` - Notifica todos sobre novos arquivos
+- `deletar_mensagem` - Executa soft delete e sincroniza remoção
+
+**Sincronização em Tempo Real:**
+- Mensagens aparecem instantaneamente para todos os usuários
+- Notificações de entrada/saída de usuários
+- Atualizações de interface sem reload da página
+
+### 4. Sistema de Arquivos
+
+**Upload de Arquivos:**
+```
+FormData → POST /api/salas/{id}/upload → Validação → Persistência → Notificação WebSocket
+```
+
+**Características:**
+- Suporte a imagens e PDFs (até 16MB)
+- Organização em subpastas por sala (`uploads/sala_id/`)
+- Validação de tipo e tamanho no backend
+- Download direto via HTTP GET
+
+**Fluxo de Compartilhamento:**
+1. Upload via HTTP → Validação → Salvamento
+2. Registro no banco de dados
+3. Notificação em tempo real via WebSocket
+4. Atualização automática da interface
+
+### 5. Soft Delete e Integridade
+
+**Remoção de Mensagens:**
+- Usuários podem deletar apenas suas próprias mensagens
+- Soft delete: marca como `tipo = 'deletada'` sem remoção física
+- Substitui conteúdo por "Mensagem deletada" ou "Arquivo deletado"
+- Sincronização instantânea via WebSocket
+
+### 6. Arquitetura do Banco de Dados
+
+**Estrutura SQLite:**
+
+**Tabela `salas`:**
+- `id` (TEXT, PK) - Identificador único (8 caracteres)
+- `nome` (TEXT) - Nome da sala
+- `criador` (TEXT) - Nome do criador
+- `senha` (TEXT) - Senha opcional
+- `criado_em` (TEXT) - Timestamp de criação
+- `esta_ativa` (INTEGER) - Status ativo/inativo
+
+**Tabela `mensagens`:**
+- `id` (TEXT, PK) - Identificador único
+- `id_sala` (TEXT, FK) - Referência à sala
+- `nome_usuario` (TEXT) - Autor da mensagem
+- `conteudo` (TEXT) - Texto ou descrição do arquivo
+- `tipo` (TEXT) - 'texto', 'arquivo' ou 'deletada'
+- `nome_arquivo` (TEXT) - Nome do arquivo (se aplicável)
+- `caminho_arquivo` (TEXT) - Caminho físico
+- `tipo_arquivo` (TEXT) - MIME type
+- `horario` (TEXT) - Timestamp
+
+**Integridade e Concorrência:**
+- Operações críticas protegidas por locks
+- Validação de integridade referencial
+- Suporte a operações concorrentes
+
+### 7. Painel Administrativo
+
+**Monitoramento em Tempo Real:**
+- Estatísticas do sistema via `/api/admin/estatisticas`
+- Gerenciamento de salas ativas
+- Remoção administrativa de salas
+- Interface AJAX para operações sem reload
+
+### Conceitos Técnicos Demonstrados
+
+- **Sistemas Distribuídos:** Arquitetura cliente-servidor escalável
+- **Protocolos de Rede:** HTTP/REST + WebSocket para diferentes necessidades
+- **Persistência:** SQLite com design relacional otimizado
+- **Tempo Real:** Sincronização instantânea via Socket.IO
+- **Segurança:** Validação de uploads, autenticação por senha
+- **Responsividade:** Design adaptativo mobile-first
+- **Concorrência:** Gerenciamento de estado distribuído thread-safe
+
+### Fluxo de Dados Integrado
+
+```
+Usuário → Frontend (HTML/JS) → 
+├── REST API (Flask) → SQLite → Resposta HTTP
+└── WebSocket (Socket.IO) → Event Broadcasting → Todos os Clientes
+```
+
+Esta arquitetura híbrida permite aproveitar o melhor dos dois protocolos: **REST para operações estruturadas** e **WebSocket para interatividade em tempo real**.
+
 ## Início Rápido
 
 ### Pré-requisitos
